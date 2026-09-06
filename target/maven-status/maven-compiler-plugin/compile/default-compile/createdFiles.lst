@@ -1,0 +1,12 @@
+com\amilingo\platform\module\career\Placeholder.class
+com\amilingo\platform\module\pet\Placeholder.class
+com\amilingo\platform\PlatformApplication.class
+com\amilingo\platform\infra\audit\Placeholder.class
+com\amilingo\platform\common\util\Placeholder.class
+com\amilingo\platform\common\config\Placeholder.class
+com\amilingo\platform\module\lang\Placeholder.class
+com\amilingo\platform\module\contest\Placeholder.class
+com\amilingo\platform\infra\ai\Placeholder.class
+com\amilingo\platform\module\interest\Placeholder.class
+com\amilingo\platform\module\user\Placeholder.class
+com\amilingo\platform\common\dto\Placeholder.class
