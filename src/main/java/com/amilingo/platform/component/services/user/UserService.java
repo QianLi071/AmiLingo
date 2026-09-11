@@ -8,12 +8,10 @@ import com.amilingo.platform.common.exceptions.PasswordIncorrectException;
 import com.amilingo.platform.common.util.Snowflake;
 import com.amilingo.platform.component.abstracts.IUserService;
 import com.amilingo.platform.component.caching.UserCache;
-import com.amilingo.platform.component.redis.ICacheable;
 import com.amilingo.platform.component.repository.UserRepository;
 import com.amilingo.platform.entity.user.User;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -90,7 +87,7 @@ public class UserService implements IUserService {
         Optional<User> userByEmail = userRepository.findUserByEmail(email);
         if (userByEmail.isPresent()){
             User user = userByEmail.get();
-            if (passwordEncoder.matches(user.getPasswordHash(), password)){
+            if (passwordEncoder.matches(password, user.getPasswordHash())){
                 return user;
             }
             throw new PasswordIncorrectException("");
