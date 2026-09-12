@@ -53,4 +53,27 @@ public class RedisService {
         Long deleted = redisTemplate.execute(script, Collections.singletonList(key), expectedValue);
         return Long.valueOf(1L).equals(deleted);
     }
+
+    /**
+     * 原子地自增计数，并在首次自增（count == 1）时设置过期时间。
+     * 用于固定窗口限流：窗口内的后续自增不会重置 TTL。
+     *
+     * @param key           计数键
+     * @param expireSeconds 过期时间（秒），仅首次自增时生效
+     * @return 自增后的计数值
+     */
+    public long incrementAndExpire(String key, long expireSeconds) {
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>(
+                "local count = redis.call('incr', KEYS[1]) "
+                        + "if count == 1 then redis.call('expire', KEYS[1], ARGV[1]) end "
+                        + "return count",
+                Long.class
+        );
+        Long count = redisTemplate.execute(
+                script,
+                Collections.singletonList(key),
+                String.valueOf(expireSeconds)
+        );
+        return count == null ? 0L : count;
+    }
 }

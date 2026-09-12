@@ -1,8 +1,8 @@
 ```
 main（生产分支，不可直接push）
-  ↑
+  ↑ pull request
 dev（开发主分支）
-↑
+  ↑ merge
 feature/zone-lang    ← B开发
 feature/zone-contest ← C开发
 feature/zone-career  ← D开发

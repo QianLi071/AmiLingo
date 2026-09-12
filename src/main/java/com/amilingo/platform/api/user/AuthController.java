@@ -1,5 +1,6 @@
 package com.amilingo.platform.api.user;
 
+import com.amilingo.platform.common.annotation.RateLimit;
 import com.amilingo.platform.common.config.security.SecurityUtil;
 import com.amilingo.platform.common.dto.UserDTO;
 import com.amilingo.platform.common.dto.request.LoginRequest;
@@ -42,6 +43,7 @@ public class AuthController {
     }
 
     @CrossOrigin
+    @RateLimit
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest formData, HttpServletResponse httpResponse) {
         log.info("User response: {}", formData);
@@ -69,7 +71,7 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(null);
     }
-
+    @RateLimit
     @DeleteMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse httpResponse) {
         if (!SecurityUtil.isAuthenticated()) {
@@ -87,6 +89,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("success", true, "message", "OK"));
     }
 
+    @RateLimit(maxRequests = 2)
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest payload) {
         User registered;

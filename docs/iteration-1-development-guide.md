@@ -27,7 +27,7 @@
 ├──────────────────────────────────────────────────────────────┤
 │  component/    业务组件层（Service / Strategy / Cache / Repo）│
 ├──────────────────────────────────────────────────────────────┤
-│  common/       通用层（DTO / 异常 / Util / Config）—— 全员共享 │
+│  common/       通用层（DTO / 异常 / Util / Config / 注解（包括限流 @RateLimit、认证检查 @RequireAuth））—— 全员共享 │
 ├──────────────────────────────────────────────────────────────┤
 │  entity/       数据实体（JPA @Entity）                        │
 └──────────────────────────────────────────────────────────────┘
@@ -46,6 +46,8 @@ com.amilingo.platform
 │   ├── pet/             # Pet controller
 │   └── user/            # AuthController, UserController
 ├── common/              # 全员共享（重点！禁止在别处重复实现）
+│   ├── annotation/      # Java元注解，包括速率限制 @RateLimit、认证检查 @RequireAuth
+│   ├── aspect/          # 自定义Java元注解注入器、执行器
 │   ├── config/          # SecurityConfig, RedisConfig, JwtAuthenticationFilter, login/*
 │   ├── dto/             # ApiResponse, UserDTO, request/*
 │   ├── exceptions/      # 异常体系
@@ -248,9 +250,48 @@ MailService.sendEmailBindingCode(email, userId)
 
 ---
 
-## 四、关键共享 Util & 基础设施（防重复造轮子 · 重点）
+## 四、关键共享 Util & 通用元注解 & 基础设施（防重复造轮子 · 重点）
 
 以下能力**已经封装完毕，所有开发人员必须直接注入使用，严禁自行实现同类逻辑**。
+
+### 4.0.1 通用java元注解 ` @RateLimit` - 同IP限流注解 
+
+**位置**：`common/annotation/RateLimit.java`  
+**参数**：
+* timeWindow 计数重置时间（默认60，**单位：秒**）
+* maxRequests 计数重置时间内的最大访问数（默认5，**单位：次**）
+
+**可以添加的位置**：controller 方法上  
+**使用方法**：  
+```java
+@RateLimit(timeWindow = 60, maxRequests = 5)
+@GetMapping("/info")
+public ApiResponse<String> info() {
+    return ApiResponse.ok("信息");
+}
+```
+
+超限返回 HTTP 429 与 {"success":false,"message":"请求过于频繁，请稍后再试","data":null} 。
+
+### 4.0.2 通用java元注解 ` @RequireAuth` - 用户登录检查注解
+
+**位置**：`common/annotation/RequireAuth.java`  
+**参数**：无  
+**可以添加的位置**：controller 方法上
+
+**使用方法**：  
+在 Controller 方法上加 @RequireAuth 即可，等价于在方法体首行写 SecurityUtil.requireAuthentication() ：
+```java
+@RequireAuth
+@GetMapping("/send")
+public ApiResponse<Void> sendEmailValidationCode() {
+  // 到这里一定已登录，可以直接用 SecurityUtil.getCurrentUserId()
+  Long userId = SecurityUtil.getCurrentUserId();
+    ...
+}
+```
+- 自动调用 SecurityUtil.requireAuthentication() ，未登录时抛 SecurityException
+- GlobalExceptionHandler 已有 SecurityException → 401 的处理，无需额外配置
 
 ### 4.1 `JwtUtil` — JWT 签发与解析
 
