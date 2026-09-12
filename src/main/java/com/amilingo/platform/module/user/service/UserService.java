@@ -113,6 +113,7 @@ public class UserService implements IUserService {
                 .build();
         try {
             userRepository.save(user);
+            userCacheEngine.setUserEmailKey(user);
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage());
         }

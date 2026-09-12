@@ -15,9 +15,8 @@ import java.util.List;
 @Table(name = "user_stats")
 public class UserStat {
     @Id
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", updatable = false, nullable = false, unique = true)
-    private User user;
+    @Column(name = "user_id", updatable = false, nullable = false, unique = true)
+    private Long user;
 
     @Column(nullable = false)
     private Long totalExp;

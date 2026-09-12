@@ -2,13 +2,16 @@ package com.amilingo.platform.api.user;
 
 import com.amilingo.platform.common.annotation.RateLimit;
 import com.amilingo.platform.common.config.security.SecurityUtil;
+import com.amilingo.platform.common.dto.ApiResponse;
 import com.amilingo.platform.common.dto.UserDTO;
+import com.amilingo.platform.common.dto.request.EmailValidateRequest;
 import com.amilingo.platform.common.dto.request.LoginRequest;
 import com.amilingo.platform.common.dto.request.RegisterRequest;
 import com.amilingo.platform.common.exceptions.ApiException;
 import com.amilingo.platform.common.util.JwtUtil;
 import com.amilingo.platform.component.ILoginStrategy;
 import com.amilingo.platform.component.LoginStrategyFactory;
+import com.amilingo.platform.component.services.MailService;
 import com.amilingo.platform.module.user.entity.user.User;
 import com.amilingo.platform.module.user.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -34,12 +37,14 @@ public class AuthController {
     private final UserService userService;
     private static final String COOKIE_ROOT = "/";
     private final LoginStrategyFactory loginStrategyFactory;
+    private final MailService mailService;
 
     @Autowired
-    public AuthController(JwtUtil jwtUtil, UserService userService, LoginStrategyFactory loginStrategyFactory) {
+    public AuthController(JwtUtil jwtUtil, UserService userService, LoginStrategyFactory loginStrategyFactory, MailService mailService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.loginStrategyFactory = loginStrategyFactory;
+        this.mailService = mailService;
     }
 
     @CrossOrigin
@@ -71,6 +76,7 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(null);
     }
+
     @RateLimit
     @DeleteMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse httpResponse) {
@@ -115,5 +121,14 @@ public class AuthController {
         } else {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Information is not completed, cloud not register.");
         }
+    }
+
+    @RateLimit(maxRequests = 1)
+    @PostMapping("/validate")
+    public ApiResponse<?> validateMailCode(@RequestBody EmailValidateRequest request) {
+        if (mailService.validateEmailCode(request.getEmail(), request.getCode())) {
+            return ApiResponse.ok("验证成功");
+        }
+        return ApiResponse.ok("验证码错误");
     }
 }

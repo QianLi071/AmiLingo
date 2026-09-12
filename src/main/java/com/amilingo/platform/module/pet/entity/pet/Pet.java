@@ -1,7 +1,9 @@
 package com.amilingo.platform.module.pet.entity.pet;
 
-import com.amilingo.platform.module.user.entity.user.User;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,11 +17,10 @@ import java.time.LocalDateTime;
 @Table(name = "pets")
 public class Pet {
     @Id
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", updatable = false, nullable = false, unique = true)
-    private User user;
+    @Column(name = "pet_user_id", updatable = false, nullable = false, unique = true)
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(name = "exp", nullable = false)

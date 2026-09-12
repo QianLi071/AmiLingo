@@ -1,16 +1,14 @@
 package com.amilingo.platform.api.user;
 
+import com.amilingo.platform.common.annotation.RateLimit;
 import com.amilingo.platform.common.config.security.SecurityUtil;
 import com.amilingo.platform.common.dto.ApiResponse;
-import com.amilingo.platform.common.exceptions.EmailNotFoundException;
+import com.amilingo.platform.common.dto.request.EmailCodeSendRequest;
 import com.amilingo.platform.component.services.MailService;
-import com.amilingo.platform.module.user.entity.user.User;
 import com.amilingo.platform.module.user.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping({"/api/v1/users"})
@@ -32,14 +30,10 @@ public class UserController {
         }
         return ResponseEntity.ok(userService.getAllUsers(Pageable.ofSize(size).withPage(page)).getContent());
     }
-
+    @RateLimit(maxRequests = 1)
     @PostMapping("/send")
-    public ApiResponse<?> sendEmailValidationCode(){
-        Long userId = SecurityUtil.getCurrentUserId();
-        User user = userService.getUserById(userId);
-        String email = Optional.of(user.getEmail()).orElseThrow(() -> new EmailNotFoundException("Email not available"));
-
-        mailService.sendEmailBindingCode(email, String.valueOf(userId));
+    public ApiResponse<?> sendEmailValidationCode(@RequestBody EmailCodeSendRequest request){
+        mailService.sendEmailBindingCode(request.getEmail());
 
         return ApiResponse.ok("验证码已发送，请查收邮箱");
     }
