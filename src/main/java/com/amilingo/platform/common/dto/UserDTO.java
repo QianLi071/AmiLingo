@@ -1,7 +1,8 @@
 package com.amilingo.platform.common.dto;
 
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Data

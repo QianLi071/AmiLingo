@@ -58,7 +58,12 @@ com.amilingo.platform
 │   ├── services/user/   # UserService, MailService
 │   ├── BaseLoginStrategy, ILoginStrategy, LoginStrategyFactory, LoginAttemptService
 ├── entity/user/         # User
-├── module/              # 业务领域占位（迭代2+）：career/contest/interest/lang/pet/user
+├── module/              # 业务领域占位
+│   └── user/            # 用户模块
+│   │   └── entity/user  # 用户数据库实体类
+│   └── pet/             # 宠物模块
+│   |   └── entity/pet   # 宠物数据库实体类
+|   └── career contest interest lang/ # 业务领域占位（迭代2+）
 ├── infra/               # 基础设施占位（迭代2+）：ai/audit
 └── GlobalExceptionHandler, PlatformApplication
 ```
@@ -221,7 +226,7 @@ MailService.sendEmailBindingCode(email, userId)
 
 详见第四章。
 
-### 3.4 `entity/` — 实体层
+### 3.4 `module/<域>/entity/` — 实体层
 
 | 实体               | 表                  | 关键字段                                                                                                                           |
 |------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------|
@@ -387,16 +392,16 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 
 ### 5.1 包与命名
 
-| 规则 | 说明 |
-|---|---|
-| Controller 放 `api/<域>/` | 如 `api/user/`、未来 `api/career/` |
-| Service 放 `component/services/<域>/` | 接口放 `component/abstracts/` |
-| Repository 放 `component/repository/` | 统一管理 |
-| 缓存类放 `component/caching/` | 继承 `AbstractCacheEngine` |
-| 实体放 `entity/<域>/` | |
+| 规则                                                 | 说明 |
+|----------------------------------------------------|---|
+| Controller 放 `api/<域>/`                            | 如 `api/user/`、未来 `api/career/` |
+| Service 放 `component/services/<域>/`                | 接口放 `component/abstracts/` |
+| Repository 放 `component/repository/`               | 统一管理 |
+| 缓存类放 `component/caching/`                          | 继承 `AbstractCacheEngine` |
+| 实体放 `module/<域>/entity/<域>/`                          | |
 | DTO 放 `common/dto/`，请求 DTO 放 `common/dto/request/` | |
-| 异常放 `common/exceptions/` | 继承 `ApiException` 或 `RuntimeException` |
-| 配置类放 `common/config/` | |
+| 异常放 `common/exceptions/`                           | 继承 `ApiException` 或 `RuntimeException` |
+| 配置类放 `common/config/`                              | |
 
 ### 5.2 新增登录方式（强制流程）
 

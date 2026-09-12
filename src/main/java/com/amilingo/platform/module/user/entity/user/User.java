@@ -1,4 +1,4 @@
-package com.amilingo.platform.entity.user;
+package com.amilingo.platform.module.user.entity.user;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
 package com.amilingo.platform.component;
 
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

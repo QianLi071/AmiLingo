@@ -3,7 +3,7 @@ package com.amilingo.platform.component;
 import com.amilingo.platform.common.exceptions.ApiException;
 import com.amilingo.platform.common.exceptions.LoginFailedException;
 import com.amilingo.platform.common.exceptions.PasswordIncorrectException;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

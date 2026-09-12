@@ -3,7 +3,7 @@ package com.amilingo.platform.component.login;
 import com.amilingo.platform.common.exceptions.ApiException;
 import com.amilingo.platform.component.BaseLoginStrategy;
 import com.amilingo.platform.component.services.user.UserService;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

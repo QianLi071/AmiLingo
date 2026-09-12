@@ -2,7 +2,7 @@ package com.amilingo.platform.component.services.user;
 
 import com.amilingo.platform.common.exceptions.EmailBindingDeliveryException;
 import com.amilingo.platform.component.caching.EmailCodeCache;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

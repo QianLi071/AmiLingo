@@ -9,7 +9,7 @@ import com.amilingo.platform.common.util.JwtUtil;
 import com.amilingo.platform.component.ILoginStrategy;
 import com.amilingo.platform.component.LoginStrategyFactory;
 import com.amilingo.platform.component.services.user.UserService;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

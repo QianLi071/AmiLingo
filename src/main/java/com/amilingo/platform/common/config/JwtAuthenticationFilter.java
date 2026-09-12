@@ -3,7 +3,7 @@ package com.amilingo.platform.common.config;
 import com.amilingo.platform.common.config.security.AuthenticatedUser;
 import com.amilingo.platform.common.util.JwtUtil;
 import com.amilingo.platform.component.repository.UserRepository;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

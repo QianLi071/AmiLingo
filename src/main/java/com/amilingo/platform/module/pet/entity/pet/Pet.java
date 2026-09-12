@@ -1,6 +1,6 @@
-package com.amilingo.platform.entity.pet;
+package com.amilingo.platform.module.pet.entity.pet;
 
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

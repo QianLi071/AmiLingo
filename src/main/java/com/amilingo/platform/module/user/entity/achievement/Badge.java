@@ -1,4 +1,4 @@
-package com.amilingo.platform.entity.achievement;
+package com.amilingo.platform.module.user.entity.achievement;
 
 import jakarta.persistence.*;
 import lombok.*;

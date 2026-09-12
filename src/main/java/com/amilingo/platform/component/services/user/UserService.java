@@ -9,7 +9,7 @@ import com.amilingo.platform.common.util.Snowflake;
 import com.amilingo.platform.component.abstracts.IUserService;
 import com.amilingo.platform.component.caching.UserCache;
 import com.amilingo.platform.component.repository.UserRepository;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;

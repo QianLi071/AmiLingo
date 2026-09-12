@@ -1,6 +1,6 @@
-package com.amilingo.platform.entity.user;
+package com.amilingo.platform.module.user.entity.user;
 
-import com.amilingo.platform.entity.achievement.Badge;
+import com.amilingo.platform.module.user.entity.achievement.Badge;
 import jakarta.persistence.*;
 import lombok.*;
 

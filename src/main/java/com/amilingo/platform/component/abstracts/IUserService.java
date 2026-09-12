@@ -1,13 +1,10 @@
 package com.amilingo.platform.component.abstracts;
 
 import com.amilingo.platform.common.dto.request.RegisterRequest;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
 
 public interface IUserService {
     @Transactional

@@ -5,7 +5,7 @@ import com.amilingo.platform.common.dto.ApiResponse;
 import com.amilingo.platform.common.exceptions.EmailNotFoundException;
 import com.amilingo.platform.component.services.user.MailService;
 import com.amilingo.platform.component.services.user.UserService;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -3,7 +3,7 @@ package com.amilingo.platform.component.caching;
 import com.amilingo.platform.common.exceptions.CacheMissedException;
 import com.amilingo.platform.component.redis.AbstractCacheEngine;
 import com.amilingo.platform.component.redis.RedisService;
-import com.amilingo.platform.entity.user.User;
+import com.amilingo.platform.module.user.entity.user.User;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
