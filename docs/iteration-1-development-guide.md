@@ -2,7 +2,7 @@
 
 > 版本：迭代 1 · 2026-09-12
 > 读者：全体后端开发人员
-> 目的：统一对项目架构、业务链路、共享基础设施的理解；明确**哪些能力已经封装好必须复用、哪些是禁止重复实现**的，避免各人各写一套。
+> 目的：统一对项目架构、业务链路、共享基础设施的理解,包括JwtUtil, PetUtil, SecurityUtil和架构链路；明确**哪些能力已经封装好必须复用、哪些是禁止重复实现**的，避免各人各写一套。
 
 ---
 
@@ -223,9 +223,13 @@ MailService.sendEmailBindingCode(email, userId)
 
 ### 3.4 `entity/` — 实体层
 
-| 实体 | 表 | 关键字段 |
-|---|---|---|
-| `User` | `users` | `id`(Long, 雪花ID), `username`, `passwordHash`, `email`, `createdAt` |
+| 实体               | 表                  | 关键字段                                                                                                                           |
+|------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `User`           | `users`            | `id`(Long, 雪花ID), `username`, `passwordHash`, `email`, `createdAt`                                                             |
+| `LearningRecord` | `learning_records` | id(Long, 雪花ID), user_id(Long, 雪花ID), zone (lang/contest/career/interest),task_name, score (0-100), duration_minutes,created_at |
+| `Pet`            | `pets`             | user_id (主键(Long, 雪花ID)), name, exp, level,evolution_stage (egg/baby/adult/legend),last_fed_at, mood (happy/sad/neutral)       |
+| `UserStat`       | `user_stats`       | user_id (主键(Long, 雪花ID)), total_exp, total_days, current_streak, badges (一对多外键关联Badges实体)                                      |
+| `Badge`          | `badages`          | `id`(Long, 雪花ID), `name`, `discription`, `value`                                                                               |
 
 ---
 
@@ -273,7 +277,31 @@ MailService.sendEmailBindingCode(email, userId)
 
 **强制**：所有需要主键 ID 的新实体，统一用 `Snowflake.nextId()`，**不要**用数据库自增或 UUID。
 
-### 4.4 `RedisService` — Redis 操作封装
+### 4.4 `PetUtil`
+| 方法 | 用途           |
+|---|--------------|
+| `PetUtil.calcExp(score, duration)` | 计算 Long 型经验值 |
+
+**注意**  
+score （0-100）
+duration单位为分钟
+
+宠物经验公式统一由A提供工具类：PetUtil.calcExp(score, duration)，所有人调用同一个。
+
+输入约束
+
+- score 钳制到 [0, 100]， duration 钳制到 ≥ 0，防止异常输入
+  基础经验
+
+- score * 10 ，满分 100 → 基础 1000 点
+  时长加成（递减收益）
+
+- sqrt(duration/60 + 1) 实现递减增长，避免长时间挂机导致经验发散
+- 参考值：0分钟→1.0x，60分钟→1.41x，240分钟→2.0x，1440分钟(24h)→5.0x
+  硬性上限
+
+- 最终结果封顶 10000，防止数值过大或溢出
+### 4.5 `RedisService` — Redis 操作封装
 
 **位置**：`component/redis/RedisService.java`
 
@@ -288,7 +316,7 @@ MailService.sendEmailBindingCode(email, userId)
 
 **强制**：业务代码中**不要直接注入 `RedisTemplate`**，统一走 `RedisService`。若现有方法不够，在 `RedisService` 中补充，不要绕过。
 
-### 4.5 `RedisDistributedLock` — 分布式锁
+### 4.6 `RedisDistributedLock` — 分布式锁
 
 **位置**：`component/redis/RedisDistributedLock.java`
 
@@ -300,7 +328,7 @@ MailService.sendEmailBindingCode(email, userId)
 
 **强制**：需要分布式互斥（如登录计数、库存扣减）时注入此 Bean，**不要**自己用 `setIfAbsent` + `delete` 实现（会有锁误删风险）。
 
-### 4.6 `AbstractCacheEngine` + `ICacheable` — 缓存模板
+### 4.7 `AbstractCacheEngine` + `ICacheable` — 缓存模板
 
 **位置**：`component/redis/AbstractCacheEngine.java`
 
@@ -315,7 +343,7 @@ MailService.sendEmailBindingCode(email, userId)
 
 **强制**：新增缓存一律继承 `AbstractCacheEngine`，Cache-Aside 的"查缓存→未命中查库→回写"模式在 Service 层实现（参考 `UserService.getUserById`）。
 
-### 4.7 `ApiResponse` — 统一响应体
+### 4.8 `ApiResponse` — 统一响应体
 
 **位置**：`common/dto/ApiResponse.java`
 
@@ -327,7 +355,7 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 
 **强制**：所有接口返回体统一用 `ApiResponse`（文件上传等特殊场景除外）。`AuthController` 中目前混用了 `Map.of(...)`，新代码请统一到 `ApiResponse`。
 
-### 4.8 异常体系 + `GlobalExceptionHandler`
+### 4.9 异常体系 + `GlobalExceptionHandler`
 
 **位置**：`common/exceptions/` + `GlobalExceptionHandler.java`
 
@@ -347,7 +375,7 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 - 业务错误抛 `ApiException` 或其子类，**不要**在 Controller 里 `try-catch` 后手动 `return ResponseEntity.status(...)`。
 - `GlobalExceptionHandler` 已统一处理 `SecurityException`→401、`ApiException`→对应状态码、`IllegalArgumentException`→400、参数校验异常→400。**不要**自己写 `@ExceptionHandler`。
 
-### 4.9 `PasswordEncoder` — 密码哈希
+### 4.10 `PasswordEncoder` — 密码哈希
 
 **位置**：`common/config/security/SecurityConfig.java`（`BCryptPasswordEncoder` Bean）
 

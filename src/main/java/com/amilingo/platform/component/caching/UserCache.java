@@ -28,23 +28,22 @@ public class UserCache extends AbstractCacheEngine<User, Long> {
     }
 
     public User getUserByEmail(@NonNull String email){
-        String phoneKey = getKeyPrefix() + email;
+        String phoneKey = emailPrefix + email;
         Object userIdStr = redisService.getValue(phoneKey);
 
         if (userIdStr == null) {
             throw new CacheMissedException(null);
         }
         try {
-            return getCachedById((Long) userIdStr);
+            return getCachedById(Long.parseLong((String) userIdStr));
         } catch (NumberFormatException e) {
-            log.error("Invalid user ID in cache for email: {}", email, e);
             redisService.deleteValue(phoneKey);
-            return null;
+            throw new CacheMissedException(e.getMessage());
         }
     }
 
     public void setUserEmailKey(User user){
-        redisService.setValue(emailPrefix, String.valueOf(user.getId()));
+        redisService.setValue(emailPrefix + user.getEmail(), String.valueOf(user.getId()));
     }
 
     @Override

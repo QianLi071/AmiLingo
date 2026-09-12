@@ -84,10 +84,10 @@ public class UserService implements IUserService {
 
     @Override
     public User loginViaEmailPwd(String email, String password) throws EmailNotFoundException, PasswordIncorrectException {
-        Optional<User> userByEmail = userRepository.findUserByEmail(email);
-        if (userByEmail.isPresent()){
-            User user = userByEmail.get();
+        User user = getUserByEmail(email);
+        if (user != null){
             if (passwordEncoder.matches(password, user.getPasswordHash())){
+                userCacheEngine.cache(user);
                 return user;
             }
             throw new PasswordIncorrectException("");

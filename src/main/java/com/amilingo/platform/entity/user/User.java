@@ -1,10 +1,6 @@
 package com.amilingo.platform.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -16,7 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users", indexes = {@Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_name", columnList = "username")})
 public class User {
     @Id
     @Column(name = "user_id", updatable = false, nullable = false, unique = true)
@@ -26,7 +23,6 @@ public class User {
     private String username;
 
     @Column(name = "password", nullable = false)
-    @JsonIgnore
     private String passwordHash;
 
     @Column(name = "email", unique = true)
