@@ -1,4 +1,4 @@
-package com.amilingo.platform.component.services.user;
+package com.amilingo.platform.module.user.service;
 
 import com.amilingo.platform.common.dto.request.RegisterRequest;
 import com.amilingo.platform.common.exceptions.CacheException;
@@ -8,8 +8,8 @@ import com.amilingo.platform.common.exceptions.PasswordIncorrectException;
 import com.amilingo.platform.common.util.Snowflake;
 import com.amilingo.platform.component.abstracts.IUserService;
 import com.amilingo.platform.component.caching.UserCache;
-import com.amilingo.platform.component.repository.UserRepository;
 import com.amilingo.platform.module.user.entity.user.User;
+import com.amilingo.platform.module.user.repository.UserRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;

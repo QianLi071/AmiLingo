@@ -1,4 +1,4 @@
-package com.amilingo.platform.component.repository;
+package com.amilingo.platform.module.user.repository;
 
 import com.amilingo.platform.module.user.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

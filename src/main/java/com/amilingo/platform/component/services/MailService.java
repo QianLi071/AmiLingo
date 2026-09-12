@@ -1,4 +1,4 @@
-package com.amilingo.platform.component.services.user;
+package com.amilingo.platform.component.services;
 
 import com.amilingo.platform.common.exceptions.EmailBindingDeliveryException;
 import com.amilingo.platform.component.caching.EmailCodeCache;

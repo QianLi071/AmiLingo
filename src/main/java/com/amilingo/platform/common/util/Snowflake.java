@@ -26,16 +26,6 @@ public abstract class Snowflake {
     private static long sequence = 0L;
     private static long lastTimestamp = -1L;
 
-    public Snowflake(long datacenterId, long workerId) {
-        if (datacenterId > MAX_DATACENTER_ID || datacenterId < 0) {
-            throw new IllegalArgumentException(String.format("datacenterId 不能大于 %d 或小于 0", MAX_DATACENTER_ID));
-        }
-        if (workerId > MAX_WORKER_ID || workerId < 0) {
-            throw new IllegalArgumentException(String.format("workerId 不能大于 %d 或小于 0", MAX_WORKER_ID));
-        }
-        log.info("Snowflake initialized with datacenterId: {}, workerId: {}", datacenterId, workerId);
-    }
-
     public static synchronized long nextId() {
         long timestamp = timeGen();
 

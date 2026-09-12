@@ -43,28 +43,33 @@
 ```
 com.amilingo.platform
 ├── api/                 # HTTP 接口
+│   ├── pet/             # Pet controller
 │   └── user/            # AuthController, UserController
 ├── common/              # 全员共享（重点！禁止在别处重复实现）
-│   ├── config/          # SecurityConfig, RedisConfig, JwtAuthenticationFilter, login/
+│   ├── config/          # SecurityConfig, RedisConfig, JwtAuthenticationFilter, login/*
 │   ├── dto/             # ApiResponse, UserDTO, request/*
 │   ├── exceptions/      # 异常体系
 │   └── util/            # JwtUtil, Snowflake
 ├── component/           # 业务组件
-│   ├── abstracts/       # IUserService 等业务接口
+│   ├── abstracts/       # IUserService, IpetService 等业务接口
 │   ├── caching/         # UserCache, EmailCodeCache
 │   ├── login/           # EmailPasswordStrategy
 │   ├── redis/           # AbstractCacheEngine, ICacheable, RedisService, RedisDistributedLock
-│   ├── repository/      # UserRepository
 │   ├── services/user/   # UserService, MailService
 │   ├── BaseLoginStrategy, ILoginStrategy, LoginStrategyFactory, LoginAttemptService
-├── entity/user/         # User
 ├── module/              # 业务领域占位
-│   └── user/            # 用户模块
-│   │   └── entity/user  # 用户数据库实体类
-│   └── pet/             # 宠物模块
-│   |   └── entity/pet   # 宠物数据库实体类
-|   └── career contest interest lang/ # 业务领域占位（迭代2+）
-├── infra/               # 基础设施占位（迭代2+）：ai/audit
+│   ├── user/            # 用户模块
+│   │   ├── entity/  
+│   │   │   ├── user/             # 用户数据库实体类
+│   │   │   └── achievement/      # 成就数据库实体
+│   │   ├── repository/           # UserRepository
+│   │   └── service/              # 用户相关服务
+│   ├── pet/                      # 宠物模块
+│   │   ├── entity/pet/           # 宠物数据库实体类
+│   │   ├── repository/           # PetRepository
+│   │   └── service/              # 宠物相关服务
+│   └── career contest interest lang/ # 业务领域占位（迭代2+）
+├── infra/                        # 基础设施占位（迭代2+）：ai/audit
 └── GlobalExceptionHandler, PlatformApplication
 ```
 
@@ -212,15 +217,20 @@ MailService.sendEmailBindingCode(email, userId)
 
 | 子包/类 | 职责 | 新增同类功能时的规范 |
 |---|---|---|
-| `services/user/UserService` | 用户 CRUD + 登录校验，实现 `IUserService` | 新业务 Service 放 `services/<域>/`，并在 `abstracts/` 定义接口 |
-| `services/user/MailService` | 邮件发送 + 验证码缓存读写 | 邮件相关统一走这里，不要在别处直接用 JavaMailSender |
-| `repository/UserRepository` | JPA 数据访问 | 新实体的 Repository 放 `repository/`，继承 `JpaRepository` |
+| `services/MailService` | 邮件发送 + 验证码缓存读写 | 邮件相关统一走这里，不要在别处直接用 JavaMailSender |
 | `caching/UserCache` / `EmailCodeCache` | 继承 `AbstractCacheEngine` 的具体缓存 | 新缓存继承 `AbstractCacheEngine<T, ID>`，实现三个抽象方法 |
 | `BaseLoginStrategy` / `ILoginStrategy` / `LoginStrategyFactory` | 登录策略模板 | 新登录方式继承 `BaseLoginStrategy`，在 `LoginStrategyConfig` 注册 Bean |
 | `LoginAttemptService` | 登录失败计数 + 分布式锁 | **不要自己写失败计数**，复用此 Service |
 | `redis/RedisService` | Redis 基础操作封装 | 所有 Redis 操作走这里，不要在业务代码中直接注入 `RedisTemplate` |
 | `redis/RedisDistributedLock` | 基于 Lua 的分布式锁 | 需要分布式互斥时注入此 Bean，不要自己 `setIfAbsent` |
 | `redis/AbstractCacheEngine` | 缓存模板（序列化/反序列化/回源） | 新缓存继承它 |
+
+### 3.2.1 `module/` — 业务组件层
+| 子包/类 | 职责 | 新增同类功能时的规范 |
+|---|---|---|
+| `module/<域>/repository/UserRepository` | JPA 数据访问 | 新实体的 Repository 放 `module/<域>/repository/`，继承 `JpaRepository` |
+| `module/user/service/UserService` | 用户 CRUD + 登录校验，实现 `IUserService` | 新业务 Service 放 `module/<域>/service/`，并在 `component/abstracts/` 定义接口 |
+
 
 ### 3.3 `common/` — 通用层（**全员共享，禁止重复实现**）
 
@@ -392,16 +402,16 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 
 ### 5.1 包与命名
 
-| 规则                                                 | 说明 |
-|----------------------------------------------------|---|
-| Controller 放 `api/<域>/`                            | 如 `api/user/`、未来 `api/career/` |
-| Service 放 `component/services/<域>/`                | 接口放 `component/abstracts/` |
-| Repository 放 `component/repository/`               | 统一管理 |
-| 缓存类放 `component/caching/`                          | 继承 `AbstractCacheEngine` |
-| 实体放 `module/<域>/entity/<域>/`                          | |
+| 规则                                                | 说明 |
+|---------------------------------------------------|---|
+| Controller 放 `api/<域>/`                           | 如 `api/user/`、未来 `api/career/` |
+| Service 放 `module/<域>/service/`                | 接口放 `component/abstracts/` |
+| Repository 放 `module/<域>/repository/`             | 统一管理 |
+| 缓存类放 `component/caching/`                         | 继承 `AbstractCacheEngine` |
+| 实体放 `module/<域>/entity/<域>/`                      | |
 | DTO 放 `common/dto/`，请求 DTO 放 `common/dto/request/` | |
-| 异常放 `common/exceptions/`                           | 继承 `ApiException` 或 `RuntimeException` |
-| 配置类放 `common/config/`                              | |
+| 异常放 `common/exceptions/`                          | 继承 `ApiException` 或 `RuntimeException` |
+| 配置类放 `common/config/`                             | |
 
 ### 5.2 新增登录方式（强制流程）
 
@@ -467,8 +477,6 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 | `UserService.loginViaEmailPwd` 中 `passwordEncoder.matches` 参数顺序 | 当前是 `matches(hash, rawPassword)`，BCrypt 的 `matches(rawPassword, hash)` 才是标准签名，需确认是否写反。 |
 | `UserCache.setUserEmailKey` 中 key 用了硬编码 `emailPrefix` 字段 | 与 `getUserByEmail` 中 `getKeyPrefix() + email` 不一致，可能导致邮箱查缓存失效。 |
 | `AuthController` 响应格式不统一 | 登录/注册返回 `Map.of(...)`，未走 `ApiResponse`。 |
-| `module/` 与 `infra/` 均为 `Placeholder` | 迭代 2 开始填充业务领域。 |
-
 ---
 
 ## 八、快速联调 Checklist
