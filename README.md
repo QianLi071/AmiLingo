@@ -27,5 +27,5 @@ java -DDATABASE_PASSWORD=你的数据库密码 -DDATABASE_HOST=你的数据库�
 
 | 任务             | 负责人    | 状态  | 构建  | 测试  | 文档                                                                        |
 |----------------|--------|-----|-----|-----|---------------------------------------------------------------------------|
-| 应用基础，登录，数据库，缓存 | Lotiyu | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) |
-| ...            |        |     |     |     |                                                                           |
+| 应用基础，登录，数据库，缓存 | Lotiyu | ✅ 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) |
+| lang 语言学习模块骨架、`infra/ai` AI 网关抽象、AI 写作评分链路（WritingScorer） | QianLi071 | 🔄 进行中 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) |
