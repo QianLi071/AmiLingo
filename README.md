@@ -9,6 +9,7 @@ mvn clean package -DskipTests
 * MySQL
 * Java 21+  
 
+运行
 ```bash
 java -DDATABASE_PASSWORD=你的数据库密码 -DDATABASE_HOST=你的数据库主机URL -DDATABASE_USERNAME=你的数据库用户名 -DREDIS_HOST=你的Redis主机 -DREDIS_PASSWORD=你的Redis密码 -DJWT_SECRET=不少于32字符的jwt密钥 -jar target/build-0.0.1-SNAPSHOT.jar
 ```
@@ -27,4 +28,4 @@ java -DDATABASE_PASSWORD=你的数据库密码 -DDATABASE_HOST=你的数据库�
 | 任务             | 负责人    | 状态  | 构建  | 测试  | 后端文档（必读）                                                                      | 前端API文档（必读）                                     |
 |----------------|--------|-----|-----|-----|---------------------------------------------------------------------------|-------------------------------------------------|
 | 应用基础，登录，数据库，缓存 | Lotiyu | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | [frontend-api-doc.md](docs/frontend-api-doc.md) |
-| ...            |        |     |     |     |                                                                           |                                                 |
+| lang 语言学习模块骨架、`infra/ai` AI 网关抽象、AI 写作评分链路（WritingScorer） | QianLi071 | 🔄 进行中 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | |

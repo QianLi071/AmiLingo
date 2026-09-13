@@ -532,5 +532,196 @@ ApiResponse.error("错误描述")           // { success:false, message, data:nu
 - [ ] 新实体 ID 是否用了 `Snowflake.nextId()`？
 
 ---
+---
+
+# AmiLingo Platform · 迭代 1 补充开发文档（lang 模块与 AI 网关）
+
+> 版本：迭代 1 · 2026-09-13 补充
+> 负责人：QianLi071
+> 读者：全体后端开发人员（尤其是 lang / AI 方向后续接手者）
+> 目的：作为迭代 1 的追加内容，定义 **AI 能力网关 `infra/ai`** 的统一抽象与使用方式；落地 **lang 语言学习模块骨架**与第一条可联调的 **AI 写作评分链路**；明确 lang 模块各层职责、与迭代 1 共享基础设施的复用关系，以及当前已知偏差与待办。
+> 说明：上文 §1.3 包结构中 `lang/`、`infra/ai` 的"业务领域占位（迭代2+）"状态已被本补充内容取代——二者在迭代 1 内已开始落地。
+
+---
+
+## 九、迭代 1 补充范围与业务链路（lang / AI）
+
+### 9.1 本次交付物
+
+| 交付物 | 状态 |
+|---|---|
+| `infra/ai/AiGateway`：统一 AI 能力接口（对话 / 强制 JSON / 向量 / 相似度） | ✅ 已完成 |
+| `infra/ai/NoopAiGateway`：桩实现，保证 Spring 上下文可启动 | ✅ 已完成 |
+| `module/lang` 分层骨架：controller / service / repository / entity / dto / enums / planner / ai / job | ✅ 已完成（占位为主） |
+| AI 写作评分链路：`WritingScorer` + `WritingPrompt` + `WritingGradeRequest/Response` | ✅ 已完成（真实模型接入前不可调用） |
+| `planner/PlanGenerator`：AI 排程引擎设计草案（Javadoc 五步） | 🔄 进行中（仅设计，无实现） |
+| REST 接口、JPA 实体化、口语评分、薄弱点分析 | 📋 待办 |
+
+### 9.2 业务链路：AI 写作评分（本迭代唯一有实质逻辑的链路）
+
+```
+客户端
+  │  POST（写作提交接口，PracticeController —— 📋 尚未实现）
+  ▼
+module/lang/controller/PracticeController        ← 占位：只收参，不写业务
+  │
+  ▼
+module/lang/service/WritingService               ← 占位：后续编排（取目标分/历史趋势、记流水、发宠物经验）
+  │
+  ▼
+module/lang/ai/WritingScorer.score(WritingGradeRequest)
+  │  ① 读取 WritingPrompt.SYSTEM（考官角色设定）
+  │  ② WritingPrompt.USER_TEMPLATE.formatted(
+  │        targetTotal, targetParts, "N/A"(历史趋势暂硬编码), prompt, essay)
+  ▼
+infra/ai/AiGateway.chatJson(system, user, WritingGradeResponse.class)
+  │  ③ 强制模型按 JSON schema 输出，直接反序列化为 WritingGradeResponse
+  ▼
+当前实现：NoopAiGateway → 抛 UnsupportedOperationException（真实模型未接入）
+目标实现：返回 WritingGradeResponse(overall, breakDown, feedback, nextActions)
+```
+
+**联调说明**：
+- 目前入口 Controller 和 Service 均为空类，链路只能从 `WritingScorer.score()` 直接调起（单测/临时 main），且运行期会在 `NoopAiGateway` 处抛异常——这是预期行为。
+- 接入真实模型时：**新增一个 `AiGateway` 实现类**即可，`WritingScorer` 无需改动（见 11.3 双 Bean 注意事项）。
+- 后续 `WritingService` 还需负责：评分后写 `learning_records`（zone=lang）、调 `PetUtil.calcExp(score, duration)` 发宠物经验，**禁止在 Scorer 里做这些**。
+
+### 9.3 规划中链路：AI 排程引擎（planner）
+
+`PlanGenerator` 的 Javadoc 已固化五步设计，供后续实现者严格按此落地，禁止另起一套：
+
+```
+PlanResult generate(PlanInput input)
+  Step 1  quotaCalculator.calc(input)                      按阶段模型+差距档位算总任务量
+  Step 2  slotExtractor.extract(userId, examDate)         从课表抽时间槽，过滤 <30 分钟
+  Step 3  taskAllocator.allocate(quota, slots, weak)      贪心分配：摸底>强化>冲刺，薄弱优先
+  Step 4  continuityRule.adjust(tasks)                    连续性规则：同分科不连续 3 天
+  Step 5  aiGateway.chat(PLAN_NARRATOR_PROMPT, context)   AI 生成本周目标文案
+```
+
+依赖类型（`PlanInput`/`PlanResult`/`WeeklyQuota`/`TimeSlot`/`StudyTask` 及 quotaCalculator、slotExtractor）**尚不存在**，实现时在 planner 包内补齐；AI 调用必须走 `AiGateway`，不得自建 HTTP 客户端。
+
+---
+
+## 十、lang 模块结构与职责
+
+```
+module/lang/
+├── controller/     # REST 接口（注意：按 §5.1 规范最终须迁移到 api/lang/，见 11.1）
+│   ├── ScheduleController.java   # 学习课表/时间块
+│   ├── GoalController.java       # 考试目标、目标分数
+│   ├── PlannerController.java    # AI 排程计划
+│   └── PracticeController.java   # 做题/写作/口语练习提交（写作评分入口）
+├── service/        # 业务编排
+│   ├── ScheduleService / GoalService / PlannerService / WritingService
+├── repository/     # 数据访问（当前为空接口，落地时继承 JpaRepository）
+│   ├── ScheduleBlockRepository / ScoreTargetRepository / PracticeAttemptRepository
+├── entity/         # 数据库实体（当前为空类，落地时加 @Entity，ID 用 Snowflake）
+│   ├── ScheduleBlock / ExamGoal / ScoreTarget / PracticeQuestion / PracticeAttempt
+├── dto/
+│   ├── request/WritingGradeRequest.java    # record，见 10.2
+│   └── response/WritingGradeResponse.java  # record，见 10.2
+├── enums/
+│   ├── ExamType.java   # 空枚举，待补 IELTS / TOEFL / GMAT
+│   └── Section.java    # 空枚举，待补听力/阅读/写作/口语等分科
+├── planner/        # AI 排程引擎子包（§9.3）
+│   ├── PlanGenerator（五步设计草案）/ StageModel / TaskAllocator / ContinuityRule
+├── ai/             # lang 专属 AI 编排（不是基础设施；基础设施只有 infra/ai/AiGateway）
+│   ├── WritingScorer.java       # ✅ 已实现
+│   ├── SpeakingScorer.java      # 📋 占位，仿 WritingScorer
+│   ├── WeaknessAnalyzer.java    # 📋 占位，基于 PracticeAttempt 流水分析薄弱分科
+│   ├── PlanNarrator.java        # 📋 占位，排程文案（配合 planner Step 5）
+│   └── prompt/
+│       ├── WritingPrompt.java   # ✅ IELTS TR/CC/LR/GRA 评分提示词
+│       └── SpeakingPrompt.java  # 📋 占位
+└── job/            # 定时任务
+    ├── TimelineJob.java         # 📋 学习时间线相关
+    └── SeatReminderJob.java     # 📋 考位提醒
+```
+
+### 10.1 `infra/ai/AiGateway` —— AI 能力统一入口（全员复用，禁止另建客户端）
+
+**位置**：`infra/ai/AiGateway.java`
+
+| 方法 | 用途 | 典型调用方 |
+|---|---|---|
+| `String chat(String systemPrompt, String userPrompt)` | 通用对话，返回纯文本 | PlanNarrator、反馈润色 |
+| `<T> T chatJson(String systemPrompt, String userPrompt, Class<T> responseType)` | 强制 JSON 输出并反序列化 | WritingScorer、SpeakingScorer、WeaknessAnalyzer |
+| `List<float[]> embed(List<String> texts)` | 向量嵌入（范文检索、同义替换） | lang 后续检索类功能 |
+| `double similarity(float[] a, float[] b)` | 余弦相似度 | 配合 embed 做匹配 |
+
+**强制**：
+- 所有大模型 / 向量模型调用一律注入 `AiGateway`，**禁止**在 lang 或其他模块里新建 OkHttp/RestClient 直连模型厂商。
+- Prompt 文本放各模块自己的 `ai/prompt/` 包，以 `public static final String` 常量（文本块）维护，**不要**散落在方法体里。
+- 需要结构化输出时一律用 `chatJson` + record DTO，不要自己 `ObjectMapper.readTree` 手解析。
+
+**位置**：`infra/ai/NoopAiGateway.java`（`@Component`）：4 个方法全部抛 `UnsupportedOperationException("...尚未接入实现")`，作用是在真实模型接入前让 Spring 上下文与编译保持绿色。
+
+### 10.2 写作评分 DTO（Java record）
+
+| 类型 | 字段 |
+|---|---|
+| `WritingGradeRequest` | `String examType`（IELTS/TOEFL/GMAT）、`String prompt`（题目）、`String essay`（作文）、`Double targetTotal`（目标总分）、`Map<String,Double> targetParts`（单科目标分） |
+| `WritingGradeResponse` | `Double overall`（总分）、`Map<String,Integer> breakDown`（TR/CC/LR/GRA 分项）、`String feedback`（≤200字中文建议）、`List<String> nextActions`（下一步动作，每条≤15字） |
+
+`WritingPrompt.USER_TEMPLATE` 约定模型输出 JSON schema：`overall`、`breakdown`、`feedback`、`next_actions`，并约束分项为 0–9 整数、禁止免责套话。
+
+---
+
+## 十一、与迭代 1 规范的对接要求（防冲突 · 重点）
+
+lang 骨架先行，落地实现时**必须**向迭代 1 的强制规范对齐：
+
+1. **包路径偏差（已知，待迁移）**：当前 Controller 在 `module/lang/controller/`、DTO 在 `module/lang/dto/`。按 §5.1：
+   - Controller 最终放 `api/lang/`（如 `api/lang/PracticeController.java`）；
+   - 通用请求/响应 DTO 放 `common/dto/`；仅 lang 内部使用的 DTO 可保留在模块内，但跨模块联调的（如评分结果）应上移。
+   - 迁移时只移动包路径，不改类名，避免其他人引用断裂。
+2. **Controller 三件套**：`@RequireAuth` 做登录校验（或首行 `SecurityUtil.requireAuthentication()`）、需要限流的提交接口加 `@RateLimit`、返回体一律 `ApiResponse.ok(...)`，禁止裸 Map。
+3. **Service 规范**：放 `module/lang/service/`，接口定义到 `component/abstracts/`（如 `IWritingService`），构造器注入；`WritingScorer` 属 AI 编排组件，不直接处理 HTTP/持久化。
+4. **实体与 Repository**：实体补 `@Entity`，主键用 `Snowflake.nextId()`；Repository 继承 `JpaRepository<实体, Long>`，放 `module/lang/repository/`（现有空接口直接 `extends JpaRepository` 即可）。
+5. **学习流水与宠物经验**：每次练习评分后写 `learning_records`（zone=`lang`），经验值统一调 `PetUtil.calcExp(score, duration)`，**禁止**自造经验公式。
+6. **枚举**：`ExamType`/`Section` 补值后，实体字段优先用枚举而不是字符串；`WritingGradeRequest.examType` 后续也应改为枚举类型。
+
+### 11.3 AI 接入注意
+
+- 真实实现上线后，用 `@Primary` 或 `@ConditionalOnMissingBean` 让 `NoopAiGateway` 自动退让，避免容器中出现两个 `AiGateway` Bean 导致注入冲突。
+- 模型密钥、base-url、超时走 `application.yml` 占位符 + 环境变量（与 DATABASE_PASSWORD 等同样方式），**禁止硬编码**。
+- 真实模型不可用时应降级抛 `ApiException`（503 语义），由 `GlobalExceptionHandler` 统一处理，不要吞异常返回空评分。
+
+---
+
+## 十二、迭代 1 补充内容的已知风险 / 待办
+
+| # | 项 | 说明 | 处理建议 |
+|---|---|---|---|
+| 1 | 🔴 JSON 字段名不一致 | Prompt 约定输出 `breakdown` / `next_actions`，record 字段为 `breakDown` / `nextActions`，直接 `chatJson` 反序列化会得到 null | 接入真实模型前给 DTO 字段加 `@JsonProperty("breakdown")` / `@JsonProperty("next_actions")`，或统一改名 |
+| 2 | 🔴 AI 未接入 | `NoopAiGateway` 全方法抛异常，调 `WritingScorer.score()` 运行期必失败 | 提供真实 `AiGateway` 实现 + 配置项后再开放接口 |
+| 3 | 🟠 空枚举 | `ExamType`、`Section` 无枚举值，字符串比较无法编译 | 尽快补 IELTS/TOEFL/GMAT 与四个分科 |
+| 4 | 🟠 包路径偏差 | Controller/DTO 暂在 module 内，与 §5.1 不一致 | 实现接口前迁移到 `api/lang/`、`common/dto/` |
+| 5 | 🟠 Planner 依赖缺失 | `PlanGenerator` 引用的 5+ 个类型/组件不存在 | 按 §9.3 在 planner 包内补齐，勿在 service 包散建 |
+| 6 | 🟡 历史趋势硬编码 | `WritingScorer` 中"最近3次写作趋势"固定传 `"N/A"` | 由 WritingService 从 PracticeAttempt 流水聚合后传入 |
+| 7 | 🟡 Repository/Entity 未 JPA 化 | 空接口/空类不产生表结构 | 随首个接口落地时补注解与继承关系 |
+| 8 | 🟡 无测试 | 仅有上下文加载测试 | 补 WritingScorer 单测（mock AiGateway，验证模板 5 个占位符顺序）与 NoopAiGateway 行为测试 |
+
+---
+
+## 十三、迭代 1 补充部分任务看板（图例见 docs/util/scrum.md）
+
+| 任务 | 负责人 | 状态 |
+|---|---|---|
+| AiGateway 接口 + NoopAiGateway 桩 | QianLi071 | ✅ 已完成 |
+| lang 模块分层骨架（9 个子包） | QianLi071 | ✅ 已完成 |
+| WritingScorer + WritingPrompt + 评分 DTO | QianLi071 | ✅ 已完成 |
+| 评分 DTO 字段名对齐（@JsonProperty） | QianLi071 | 📋 待办 🔥 |
+| PlanGenerator 排程引擎实现 | QianLi071 | 🔄 进行中 |
+| PracticeController + WritingService（首个可联调接口） | QianLi071 | 📋 待办 🔥 |
+| 实体 JPA 化 + Repository 继承 JpaRepository | QianLi071 | 📋 待办 |
+| Controller/DTO 包路径迁移对齐 §5.1 | QianLi071 | 📋 待办 |
+| SpeakingScorer / SpeakingPrompt | （认领） | 📋 待办 |
+| WeaknessAnalyzer / PlanNarrator | （认领） | 📋 待办 |
+| TimelineJob / SeatReminderJob | （认领） | 📋 待办 |
+| 真实 AiGateway 实现（模型接入） | （认领） | 📋 待办 |
+
+---
 
 *本文档随迭代持续更新。如有疑问或发现文档与代码不一致，以代码为准并同步更新本文档。*
