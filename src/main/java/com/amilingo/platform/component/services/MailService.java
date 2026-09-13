@@ -1,12 +1,15 @@
 package com.amilingo.platform.component.services;
 
+import com.amilingo.platform.common.exceptions.ApiException;
 import com.amilingo.platform.common.exceptions.EmailBindingDeliveryException;
 import com.amilingo.platform.component.caching.EmailCodeCache;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -21,6 +24,13 @@ import java.security.SecureRandom;
 public class MailService {
     private static final String SUBJECT = "Amilingo邮箱验证码";
 
+    private static final String BODY = """
+                                        [Amilingo] 您正在进行邮箱绑定操作。
+                                        本次验证码为：%s
+                                        验证码5分钟内有效，请勿将验证码告知他人。
+                                        如非本人操作，请忽略本邮件 - TenacityCodeX安全中心
+                                        """;
+
     private final SecureRandom random = new SecureRandom();
     private final JavaMailSender mailSender;
     private final String host;
@@ -29,6 +39,7 @@ public class MailService {
     private final String from;
     private final String fromName;
     private final EmailCodeCache emailCodeCache;
+    private final EmailValidationService emailValidationService;
 
     public MailService(
             ObjectProvider<JavaMailSender> mailSenderProvider,
@@ -37,7 +48,7 @@ public class MailService {
             @Value("${spring.mail.password:}") String password,
             @Value("${app.mail.from:}") String from,
             @Value("${app.mail.from-name:Amilingo}") String fromName,
-            EmailCodeCache emailCodeCache) {
+            EmailCodeCache emailCodeCache, EmailValidationService emailValidationService) {
         this.mailSender = mailSenderProvider.getIfAvailable();
         this.host = host;
         this.username = username;
@@ -45,18 +56,21 @@ public class MailService {
         this.from = from;
         this.fromName = fromName;
         this.emailCodeCache = emailCodeCache;
+        this.emailValidationService = emailValidationService;
     }
 
     public void sendEmailBindingCode(String recipient) {
+        String code = numericCode(6);
+        emailCodeCache.cacheAndExpire(code, recipient);
         if (mailSender == null
                 || !StringUtils.hasText(host)
                 || !StringUtils.hasText(username)
                 || !StringUtils.hasText(password)
                 || !StringUtils.hasText(from)) {
-            throw new EmailBindingDeliveryException("");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Email not available");
         }
-        String code = numericCode(6);
         try {
+            recipient = emailValidationService.normalize(recipient);
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
@@ -67,17 +81,12 @@ public class MailService {
             helper.setTo(recipient);
             helper.setSubject(SUBJECT);
 
-            helper.setText("""
-                    [Amilingo] 您正在进行邮箱绑定操作。
-                    本次验证码为：%s
-                    验证码5分钟内有效，请勿将验证码告知他人。
-                    如非本人操作，请忽略本邮件 - TenacityCodeX安全中心
-                    """.formatted(code));
+            helper.setText(BODY.formatted(code));
             mailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException | MailException exception) {
             throw new EmailBindingDeliveryException(exception.toString());
-        } finally {
-            emailCodeCache.cache(code);
+        } catch (BadRequestException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Email not available");
         }
     }
 

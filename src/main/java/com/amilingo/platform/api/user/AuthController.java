@@ -129,6 +129,6 @@ public class AuthController {
         if (mailService.validateEmailCode(request.getEmail(), request.getCode())) {
             return ApiResponse.ok("验证成功");
         }
-        return ApiResponse.ok("验证码错误");
+        return ApiResponse.error("验证码错误");
     }
 }

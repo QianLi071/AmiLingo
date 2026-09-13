@@ -24,8 +24,8 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getUsers(@RequestParam(name = "p") int page, @RequestParam(name = "n") int size){
         SecurityUtil.requireAuthentication();
-        if (page <= 0 || size <= 0 || size >= 20){
-            page = 1;
+        if (page < 0 || size <= 0 || size >= 20){
+            page = 0;
             size = 10;
         }
         return ResponseEntity.ok(userService.getAllUsers(Pageable.ofSize(size).withPage(page)).getContent());

@@ -1,15 +1,14 @@
 # AmiLingo
 
-### 本机运行
+### 如何运行？
 ```bash
 mvn clean package -DskipTests
 ```
-确保安装了：
+确保安装和运行了：
 * Redis 8.0.x
 * MySQL
 * Java 21+  
 
-运行
 ```bash
 java -DDATABASE_PASSWORD=你的数据库密码 -DDATABASE_HOST=你的数据库主机URL -DDATABASE_USERNAME=你的数据库用户名 -DREDIS_HOST=你的Redis主机 -DREDIS_PASSWORD=你的Redis密码 -DJWT_SECRET=不少于32字符的jwt密钥 -jar target/build-0.0.1-SNAPSHOT.jar
 ```
@@ -25,7 +24,7 @@ java -DDATABASE_PASSWORD=你的数据库密码 -DDATABASE_HOST=你的数据库�
 
 ## 版本：迭代 1 · 2026-09-12
 
-| 任务             | 负责人    | 状态  | 构建  | 测试  | 文档                                                                        |
-|----------------|--------|-----|-----|-----|---------------------------------------------------------------------------|
-| 应用基础，登录，数据库，缓存 | Lotiyu | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) |
-| ...            |        |     |     |     |                                                                           |
+| 任务             | 负责人    | 状态  | 构建  | 测试  | 后端文档（必读）                                                                      | 前端API文档（必读）                                     |
+|----------------|--------|-----|-----|-----|---------------------------------------------------------------------------|-------------------------------------------------|
+| 应用基础，登录，数据库，缓存 | Lotiyu | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | [frontend-api-doc.md](docs/frontend-api-doc.md) |
+| ...            |        |     |     |     |                                                                           |                                                 |

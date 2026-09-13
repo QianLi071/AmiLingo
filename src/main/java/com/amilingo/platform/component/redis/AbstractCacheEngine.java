@@ -22,12 +22,16 @@ public abstract class AbstractCacheEngine<T, ID> implements ICacheable<T, ID> {
     public void cache(T object) throws CacheException {
         try {
             String userJson = objectMapper.writeValueAsString(object);
-            String userKey = getKeyPrefix() + getId(object);
+            String userKey = getCacheKey(object);
             redisService.setValue(userKey, userJson);
         } catch (JacksonException e) {
             log.error("Failed to cache object: {}", object, e);
             throw new CacheException(null);
         }
+    }
+
+    public String getCacheKey(T object) {
+        return getKeyPrefix() + getId(object);
     }
 
     @Override
