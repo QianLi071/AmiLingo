@@ -25,7 +25,7 @@
 ## 环境准备
 1. Python 3.13
 2. pip install -r requirements.txt
-3. 下载 GGUF 模型到 models/（列出 3 个文件名）
+3. 下载 GGUF 模型到 models/
 4. 编译 llama.cpp（简述：VS Build Tools + cmake -B build）
 
 ## 启动（4 个窗口）
@@ -47,5 +47,3 @@
 - 单次评分约 3-5 分钟（CPU 推理）
 - 口语/听力/阅读模块前端为 mock
 - 图片识别仅支持印刷体，手写效果差
-
-读现有文件确认信息，生成完整 README.md。
