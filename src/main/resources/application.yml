@@ -40,3 +40,9 @@ microservice:
 jwt:
   secret: ${JWT_SECRET:YourSecretKeyForJwtTokenGeneration1234567890}
   expiration: ${JWT_EXPIRATION:86400000}
+
+# Python 离线 AI 服务（OfflineAssistant / FastAPI）地址
+# Java 端 PythonAiGateway 通过 HTTP 调用此服务完成写作批改等 AI 推理
+ai:
+  python:
+    base-url: ${AI_PYTHON_BASE_URL:http://localhost:8000}
