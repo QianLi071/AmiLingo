@@ -1,5 +1,7 @@
 # AmiLingo
 
+> AI 学习平台 —— Java 在线业务后端 + Python 本地 AI 推理 + 前端
+
 
 ## 架构概览
 
