@@ -1,7 +1,7 @@
 # OfflineAssistant — 本地化 AI 写作批改服务
 
 ## 项目简介
-基于 llama.cpp 本地推理的雅思写作批改系统。前端提交作文 →
+基于 llama.cpp 本地推理的写作批改系统。前端提交作文 →
 后端调 Gemma-4-E2B（多模态评分）+ Qwen3-Embedding（范文检索）
 → 返回雅思四维评分 + 逐句批改 + 改进建议。全程无云端 API。
 
