@@ -1,8 +1,3 @@
-【任务：生成 README.md】
-
-在 OfflineAssistant/ 根目录新建 README.md。内容基于以下结构，
-先读现有文件确认信息准确，不要编造。
-
 # OfflineAssistant — 本地化 AI 写作批改服务
 
 ## 项目简介
