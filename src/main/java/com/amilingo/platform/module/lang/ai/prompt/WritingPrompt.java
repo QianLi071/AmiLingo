@@ -1,5 +1,11 @@
 package com.amilingo.platform.module.lang.ai.prompt;
 
+/**
+ * @deprecated 迭代 2 起 Prompt 单一数据源迁移至 Python 端
+ * （{@code backend/app/prompts/registry.py}），Java 端不再持有 Prompt 文本。
+ * 此类将在迭代 3 删除。
+ */
+@Deprecated
 public class WritingPrompt {
     public static final String SYSTEM = """
         你是IELTS写作考官，按官方TR/CC/LR/GRA四项独立打分（0-9）。
