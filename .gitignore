@@ -1,1 +1,8 @@
-/target/
+__pycache__/
+*.pyc
+.env
+target/
+.vscode/
+src/main/python/OfflineAssistant/models/
+src/main/python/OfflineAssistant/llama.cpp/
+src/main/python/OfflineAssistant/backend/data/vector_store/
