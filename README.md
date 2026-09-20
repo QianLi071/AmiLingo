@@ -1,6 +1,5 @@
 # AmiLingo
 
-> 养宠式 AI 备考平台 —— Java 在线业务后端 + Python 本地 AI 推理 + IELTS 前端 Demo
 
 ## 架构概览
 
