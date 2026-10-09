@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlimigoAI · 语言区 Demo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <!-- 个性化测评引导（首次访问显示） -->
+  <div class="onboarding" id="onboarding">
+    <div class="ob-container">
+      <!-- 进度条 -->
+      <div class="ob-progress-wrap" id="ob-progress-wrap">
+        <div class="ob-progress-bar" id="ob-progress-bar"></div>
+      </div>
+
+      <!-- Step 内容区 -->
+      <div class="ob-content" id="ob-content"></div>
+
+      <!-- 底部按钮 -->
+      <div class="ob-footer">
+        <button class="btn btn-ghost" id="ob-prev" style="display:none">上一步</button>
+        <div class="ob-footer-right">
+          <span class="muted" id="ob-hint"></span>
+          <button class="btn btn-primary" id="ob-next">开始测评</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <!-- 侧边导航 -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">AI</div>
+        <div class="brand-text">
+          <div class="brand-name">AlimigoAI</div>
+          <div class="brand-sub">语言区 · Demo</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav">
+        <a class="nav-item active" data-view="dashboard">
+          <span class="nav-ico">📊</span><span>仪表盘</span>
+        </a>
+        <a class="nav-item" data-view="schedule">
+          <span class="nav-ico">📅</span><span>课表管理</span>
+        </a>
+        <a class="nav-item" data-view="plan">
+          <span class="nav-ico">🧠</span><span>AI 排程</span>
+        </a>
+        <a class="nav-item" data-view="timeline">
+          <span class="nav-ico">⏱️</span><span>考试时间线</span>
+        </a>
+        <a class="nav-item" data-view="checklist">
+          <span class="nav-ico">✅</span><span>考前 Checklist</span>
+        </a>
+        <a class="nav-item" data-view="practice">
+          <span class="nav-ico">📝</span><span>听说读写</span>
+        </a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="user-chip">
+          <div class="avatar">L</div>
+          <div>
+            <div class="u-name">林同学</div>
+            <div class="u-role" id="user-role">目标 6.5</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="btn-reassess" style="width:100%;margin-top:10px;font-size:12px;">🔄
+          重新测评</button>
+      </div>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">仪表盘</h1>
+          <p id="view-sub" class="muted">雅思备考全流程陪跑</p>
+        </div>
+        <div class="topbar-right">
+          <div class="exam-badge">
+            <span class="dot"></span>
+            <span id="exam-countdown">距考试 — 天</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 仪表盘 -->
+      <section class="view active" id="view-dashboard">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head">
+              <h3>考试目标</h3>
+              <span class="tag tag-blue">IELTS Academic</span>
+            </div>
+            <div class="goal-row">
+              <div class="goal-big" id="goal-total">6.5</div>
+              <div class="goal-meta">
+                <div>目标总分</div>
+                <div class="muted">单科不低于 <span id="goal-minpart">6.0</span></div>
+              </div>
+            </div>
+            <div class="score-grid" id="score-targets"></div>
+            <div class="profile-info" id="profile-info"
+              style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;display:grid;gap:6px;">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>当前水平</h3>
+              <span class="tag tag-orange">AI 测评</span>
+            </div>
+            <div class="goal-row">
+              <div class="goal-big" id="current-total">5.5</div>
+              <div class="goal-meta">
+                <div>当前总分</div>
+                <div class="muted">差距 <b class="text-danger" id="score-gap">1.0</b></div>
+              </div>
+            </div>
+            <div class="score-grid" id="score-current"></div>
+            <div class="profile-info" id="current-info"
+              style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;display:grid;gap:6px;">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>目标院校</h3>
+              <span class="tag tag-green">3 所</span>
+            </div>
+            <ul class="school-list" id="school-list"></ul>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>差距分析</h3>
+            </div>
+            <div id="gap-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>今日任务</h3>
+              <span class="muted" id="today-date"></span>
+            </div>
+            <ul class="task-list" id="today-tasks"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 课表 -->
+      <section class="view" id="view-schedule">
+        <div class="card">
+          <div class="card-head">
+            <h3>课表与空闲时段</h3>
+            <div class="btn-group">
+              <button class="btn btn-ghost" id="btn-clear-schedule">清空</button>
+              <button class="btn btn-primary" id="btn-save-schedule">保存课表</button>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="sw sw-busy"></i>有课 / 不可用</span>
+            <span><i class="sw sw-avail"></i>高效学习时段</span>
+            <span class="muted">点击格子切换状态，拖拽边缘可细化到 15 分钟</span>
+          </div>
+          <div class="schedule-wrap">
+            <div class="schedule-grid" id="schedule-grid"></div>
+          </div>
+          <div class="schedule-summary" id="schedule-summary"></div>
+        </div>
+      </section>
+
+      <!-- AI 排程 -->
+      <section class="view" id="view-plan">
+        <div class="card">
+          <div class="card-head">
+            <h3>AI 学习计划排程引擎</h3>
+            <button class="btn btn-primary" id="btn-generate">生成备考计划</button>
+          </div>
+          <div class="plan-config">
+            <div class="cfg-item">
+              <label>考试日期</label>
+              <input type="date" id="cfg-exam-date" />
+            </div>
+            <div class="cfg-item">
+              <label>每周投入小时</label>
+              <input type="number" id="cfg-hours" value="12" min="1" max="40" />
+            </div>
+            <div class="cfg-item">
+              <label>最小任务块(分钟)</label>
+              <input type="number" id="cfg-min" value="30" min="15" max="120" step="15" />
+            </div>
+            <div class="cfg-item">
+              <label>最大任务块(分钟)</label>
+              <input type="number" id="cfg-max" value="90" min="30" max="240" step="15" />
+            </div>
+            <div class="cfg-item cfg-check">
+              <label><input type="checkbox" id="cfg-weekend" checked /> 周末加量</label>
+            </div>
+            <div class="cfg-item cfg-check">
+              <label><input type="checkbox" id="cfg-evening" /> 避开晚上</label>
+            </div>
+          </div>
+          <div class="plan-output" id="plan-output">
+            <div class="empty-hint">点击「生成备考计划」，AI 将按你的课表空闲块切片排程。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 时间线 -->
+      <section class="view" id="view-timeline">
+        <div class="card">
+          <div class="card-head">
+            <h3>考试流程时间线</h3>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </section>
+
+      <!-- Checklist -->
+      <section class="view" id="view-checklist">
+        <div class="card">
+          <div class="card-head">
+            <h3>考前 Checklist</h3>
+            <span class="muted" id="checklist-progress"></span>
+          </div>
+          <div id="checklist-groups"></div>
+        </div>
+      </section>
+
+      <!-- 听说读写 -->
+      <section class="view" id="view-practice">
+        <div class="card">
+          <div class="card-head">
+            <h3>听说读写练习</h3>
+            <div class="tabs" id="practice-tabs">
+              <button class="tab active" data-sec="R">阅读</button>
+              <button class="tab" data-sec="W">写作</button>
+              <button class="tab" data-sec="L">听力</button>
+              <button class="tab" data-sec="S">口语</button>
+            </div>
+          </div>
+          <div id="practice-body"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js?v=2"></script>
+  <script src="js/data.js"></script>
+  <script src="js/assessment.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+
+</html>

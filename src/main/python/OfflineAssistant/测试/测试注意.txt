@@ -1,0 +1,13 @@
+:: 4 个窗口，各自一个，以OfflineAssistant路径为准
+:: 窗口 1
+backend\scripts\start_llama.bat        → 等 "listening on 8081"
+
+:: 窗口 2
+backend\scripts\start_embed.bat        → 等 "listening on 8082"
+
+:: 窗口 3
+python main.py                          → 等 "Uvicorn running on 8000"
+
+:: 窗口 4
+cd frontend\IELTS
+python -m http.server 8080              → 等任何输出
