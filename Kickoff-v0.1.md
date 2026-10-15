@@ -129,3 +129,210 @@ feature/zone-career  ← D开发
 feature/zone-interest← D或E
 feature/frontend     ← E开发
 ```
+
+---
+
+## 补充接口文档：论文 / 专利 / 科研项目台账模块
+
+> 以下三个模块为学术成果台账，独立于宠物成长主流程，供用户记录和管理个人学术经历。
+> 响应体统一使用 `Result<T>` 包装，格式与上方一致：`{ "code": 200, "message": "ok", "data": ... }`
+
+---
+
+### 论文台账 `/api/paper`
+
+#### 查询用户所有论文
+```
+GET /api/paper?userId={userId}
+响应体：
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "title": "论文标题",
+      "authorOrder": 1,
+      "journal": "期刊/会议名称",
+      "level": "SCI Q1",          // SCI Q1 / SCI Q2 / EI / CCF-A / CCF-B / 核心期刊 / 普通期刊
+      "status": "PUBLISHED",      // WRITING / SUBMITTED / ACCEPTED / PUBLISHED
+      "submissionDate": "2024-03-01",
+      "acceptanceDate": "2024-05-10",
+      "publicationDate": "2024-08-01",
+      "doi": "10.1000/xyz123",
+      "attachments": ["manuscript_v3.pdf", "review_comments.docx"]
+    }
+  ]
+}
+```
+
+#### 查询单条论文
+```
+GET /api/paper/{id}
+响应体：同上单条对象，不存在时 code=404
+```
+
+#### 新增论文
+```
+POST /api/paper
+请求体：
+{
+  "userId": 1,
+  "title": "论文标题",
+  "authorOrder": 1,
+  "journal": "期刊名称",
+  "level": "EI",
+  "status": "WRITING",
+  "submissionDate": null,
+  "acceptanceDate": null,
+  "publicationDate": null,
+  "doi": null,
+  "attachments": []
+}
+响应体：新增后的完整论文对象（含 id）
+```
+
+#### 更新论文
+```
+PUT /api/paper/{id}
+请求体：同新增，传入需要更新的字段
+响应体：更新后的完整论文对象，不存在时 code=404
+```
+
+#### 删除论文
+```
+DELETE /api/paper/{id}
+响应体：{ "code": 200, "data": null }，不存在时 code=404
+```
+
+---
+
+### 专利台账 `/api/patent`
+
+#### 查询用户所有专利
+```
+GET /api/patent?userId={userId}
+响应体：
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "name": "专利名称",
+      "type": "INVENTION",         // INVENTION=发明 / UTILITY=实用新型 / DESIGN=外观设计
+      "applicationNumber": "CN202410001234.1",
+      "grantNumber": null,
+      "inventorOrder": 1,
+      "status": "APPLIED",         // APPLIED / SUBSTANTIVE_EXAM / GRANTED / REJECTED
+      "applicationDate": "2024-01-15",
+      "grantDate": null,
+      "attachments": ["patent_draft.pdf"]
+    }
+  ]
+}
+```
+
+#### 查询单条专利
+```
+GET /api/patent/{id}
+响应体：同上单条对象，不存在时 code=404
+```
+
+#### 新增专利
+```
+POST /api/patent
+请求体：
+{
+  "userId": 1,
+  "name": "专利名称",
+  "type": "INVENTION",
+  "applicationNumber": "CN202410001234.1",
+  "grantNumber": null,
+  "inventorOrder": 1,
+  "status": "APPLIED",
+  "applicationDate": "2024-01-15",
+  "grantDate": null,
+  "attachments": []
+}
+响应体：新增后的完整专利对象（含 id）
+```
+
+#### 更新专利
+```
+PUT /api/patent/{id}
+请求体：同新增，传入需要更新的字段
+响应体：更新后的完整专利对象，不存在时 code=404
+```
+
+#### 删除专利
+```
+DELETE /api/patent/{id}
+响应体：{ "code": 200, "data": null }，不存在时 code=404
+```
+
+---
+
+### 科研项目台账 `/api/research`
+
+#### 查询用户所有科研项目
+```
+GET /api/research?userId={userId}
+响应体：
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "projectName": "项目名称",
+      "role": "核心成员",
+      "supervisor": "指导教师姓名",
+      "laboratory": "所属实验室",
+      "startDate": "2023-09-01",
+      "endDate": null,
+      "status": "ONGOING",         // ONGOING / COMPLETED / SUSPENDED
+      "outcome": "成果描述",
+      "attachments": ["report.pdf"]
+    }
+  ]
+}
+```
+
+#### 查询单条科研项目
+```
+GET /api/research/{id}
+响应体：同上单条对象，不存在时 code=404
+```
+
+#### 新增科研项目
+```
+POST /api/research
+请求体：
+{
+  "userId": 1,
+  "projectName": "项目名称",
+  "role": "核心成员",
+  "supervisor": "指导教师姓名",
+  "laboratory": "所属实验室",
+  "startDate": "2023-09-01",
+  "endDate": null,
+  "status": "ONGOING",
+  "outcome": null,
+  "attachments": []
+}
+响应体：新增后的完整科研项目对象（含 id）
+```
+
+#### 更新科研项目
+```
+PUT /api/research/{id}
+请求体：同新增，传入需要更新的字段
+响应体：更新后的完整科研项目对象，不存在时 code=404
+```
+
+#### 删除科研项目
+```
+DELETE /api/research/{id}
+响应体：{ "code": 200, "data": null }，不存在时 code=404
+```
