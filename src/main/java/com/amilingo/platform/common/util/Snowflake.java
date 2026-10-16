@@ -26,6 +26,22 @@ public abstract class Snowflake {
     private static long sequence = 0L;
     private static long lastTimestamp = -1L;
 
+    /**
+     * 由 Spring 启动初始化器调用，注入配置的 workerId / datacenterId。
+     * （{@code @Value} 不能作用于 static 字段，故显式配置。）
+     */
+    public static synchronized void configure(long worker, long datacenter) {
+        if (worker > MAX_WORKER_ID || worker < 0) {
+            throw new IllegalArgumentException("workerId 超出范围 [0," + MAX_WORKER_ID + "]: " + worker);
+        }
+        if (datacenter > MAX_DATACENTER_ID || datacenter < 0) {
+            throw new IllegalArgumentException("datacenterId 超出范围 [0," + MAX_DATACENTER_ID + "]: " + datacenter);
+        }
+        workerId = worker;
+        datacenterId = datacenter;
+        log.info("Snowflake 初始化 workerId={}, datacenterId={}", workerId, datacenterId);
+    }
+
     public static synchronized long nextId() {
         long timestamp = timeGen();
 
