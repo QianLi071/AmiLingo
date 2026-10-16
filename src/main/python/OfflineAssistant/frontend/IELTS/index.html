@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlimigoAI · 语言区 Demo</title>
+  <link rel="stylesheet" href="css/style.css?v=5" />
+  <link rel="stylesheet" href="css/cycle-plan.css?v=1" />
+</head>
+
+<body>
+  <!-- 个性化测评引导（首次访问显示） -->
+  <div class="onboarding" id="onboarding">
+    <div class="ob-container">
+      <!-- 进度条 -->
+      <div class="ob-progress-wrap" id="ob-progress-wrap">
+        <div class="ob-progress-bar" id="ob-progress-bar"></div>
+      </div>
+
+      <!-- Step 内容区 -->
+      <div class="ob-content" id="ob-content"></div>
+
+      <!-- 底部按钮 -->
+      <div class="ob-footer">
+        <button class="btn btn-ghost" id="ob-prev" style="display:none">上一步</button>
+        <div class="ob-footer-right">
+          <span class="muted" id="ob-hint"></span>
+          <button class="btn btn-primary" id="ob-next">开始测评</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <!-- 侧边导航 -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">AI</div>
+        <div class="brand-text">
+          <div class="brand-name">AlimigoAI</div>
+          <div class="brand-sub">语言区 · Demo</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav">
+        <a class="nav-item active" data-view="dashboard">
+          <span class="nav-ico">📊</span><span>仪表盘</span>
+        </a>
+        <a class="nav-item" data-view="schedule">
+          <span class="nav-ico">📅</span><span>时间资源</span>
+        </a>
+        <a class="nav-item" data-view="cycle">
+          <span class="nav-ico">🗺️</span><span>长周期规划</span>
+        </a>
+        <a class="nav-item" data-view="plan">
+          <span class="nav-ico">🧠</span><span>AI 排程</span>
+        </a>
+        <a class="nav-item" data-view="timeline">
+          <span class="nav-ico">⏱️</span><span>考试时间线</span>
+        </a>
+        <a class="nav-item" data-view="checklist">
+          <span class="nav-ico">✅</span><span>考前 Checklist</span>
+        </a>
+        <a class="nav-item" data-view="practice">
+          <span class="nav-ico">📝</span><span>听说读写</span>
+        </a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="user-chip">
+          <div class="avatar">L</div>
+          <div>
+            <div class="u-name">林同学</div>
+            <div class="u-role" id="user-role">目标 6.5</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="btn-reassess" style="width:100%;margin-top:10px;font-size:12px;">🔄
+          重新测评</button>
+      </div>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">仪表盘</h1>
+          <p id="view-sub" class="muted">雅思备考全流程陪跑</p>
+        </div>
+        <div class="topbar-right">
+          <div class="exam-badge">
+            <span class="dot"></span>
+            <span id="exam-countdown">距考试 — 天</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 仪表盘 -->
+      <section class="view active" id="view-dashboard">
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head">
+              <h3>考试目标</h3>
+              <span class="tag tag-blue">IELTS Academic</span>
+            </div>
+            <div class="goal-row">
+              <div class="goal-big" id="goal-total">6.5</div>
+              <div class="goal-meta">
+                <div>目标总分</div>
+                <div class="muted">单科不低于 <span id="goal-minpart">6.0</span></div>
+              </div>
+            </div>
+            <div class="score-grid" id="score-targets"></div>
+            <div class="profile-info" id="profile-info"
+              style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;display:grid;gap:6px;">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>当前水平</h3>
+              <span class="tag tag-orange">AI 测评</span>
+            </div>
+            <div class="goal-row">
+              <div class="goal-big" id="current-total">5.5</div>
+              <div class="goal-meta">
+                <div>当前总分</div>
+                <div class="muted">差距 <b class="text-danger" id="score-gap">1.0</b></div>
+              </div>
+            </div>
+            <div class="score-grid" id="score-current"></div>
+            <div class="profile-info" id="current-info"
+              style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;display:grid;gap:6px;">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>目标院校</h3>
+              <span class="tag tag-green">3 所</span>
+            </div>
+            <ul class="school-list" id="school-list"></ul>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>差距分析</h3>
+            </div>
+            <div id="gap-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>今日任务</h3>
+              <span class="muted" id="today-date"></span>
+            </div>
+            <ul class="task-list" id="today-tasks"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 时间资源（原课表） -->
+      <section class="view" id="view-schedule">
+        <div class="card">
+          <div class="card-head">
+            <h3>时间资源管理</h3>
+            <div class="btn-group">
+              <button class="btn btn-ghost" id="btn-clear-schedule">清空</button>
+              <button class="btn btn-primary" id="btn-save-schedule">保存</button>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="sw sw-unavail"></i>🔴 完全不可用（上课/会议）</span>
+            <span><i class="sw sw-fragment"></i>🟡 碎片琐事（通勤/吃饭）</span>
+            <span><i class="sw sw-deep"></i>🟢 高效深度学习</span>
+            <span><i class="sw sw-free"></i>⚪ 普通空闲</span>
+            <span><i class="sw sw-rest"></i>🟣 休息（不分配任务）</span>
+          </div>
+          <div class="sched-toolbar">
+            <span class="muted">填充粒度：</span>
+            <button class="gran-btn" data-g="15">15 分钟</button>
+            <button class="gran-btn active" data-g="30">30 分钟</button>
+            <button class="gran-btn" data-g="60">1 小时</button>
+            <span class="muted" style="margin-left:14px">涂抹类型：</span>
+            <button class="type-btn active" data-t="1">🔴 完全不可用</button>
+            <button class="type-btn" data-t="2">🟡 碎片琐事</button>
+            <button class="type-btn" data-t="3">🟢 高效深度学习</button>
+            <button class="type-btn" data-t="4">⚪ 普通空闲</button>
+            <button class="type-btn" data-t="5">🟣 休息时段</button>
+            <button class="type-btn" data-t="0">🧹 橡皮擦</button>
+          </div>
+          <div class="muted" style="margin-bottom:10px;font-size:12px;">
+            快速录入：选粒度与类型后点击网格涂抹（每小格 = 1 分钟）；分钟级起止时间请用下方「精确录入」。
+          </div>
+          <div class="schedule-wrap">
+            <div class="schedule-grid" id="schedule-grid"></div>
+          </div>
+          <div class="schedule-summary" id="schedule-summary"></div>
+        </div>
+
+        <!-- 精确录入（分钟级） -->
+        <div class="card">
+          <div class="card-head">
+            <h3>精确录入（分钟级）</h3>
+          </div>
+          <div class="precise-form">
+            <div class="cfg-item">
+              <label>循环规则</label>
+              <select id="pf-recurrence">
+                <option value="WEEKLY">周循环（每周重复）</option>
+                <option value="ONCE">一次性临时事件</option>
+              </select>
+            </div>
+            <div class="cfg-item" id="pf-day-wrap">
+              <label>星期</label>
+              <select id="pf-day">
+                <option value="1">周一</option>
+                <option value="2">周二</option>
+                <option value="3">周三</option>
+                <option value="4">周四</option>
+                <option value="5">周五</option>
+                <option value="6">周六</option>
+                <option value="7">周日</option>
+              </select>
+            </div>
+            <div class="cfg-item" id="pf-date-wrap" style="display:none">
+              <label>日期</label>
+              <input type="date" id="pf-date" />
+            </div>
+            <div class="cfg-item">
+              <label>开始时间</label>
+              <input type="time" id="pf-start" value="09:00" />
+            </div>
+            <div class="cfg-item">
+              <label>结束时间</label>
+              <input type="time" id="pf-end" value="10:00" />
+            </div>
+            <div class="cfg-item">
+              <label>类型标签</label>
+              <select id="pf-type">
+                <option value="UNAVAILABLE">🔴 完全不可用</option>
+                <option value="FRAGMENT">🟡 碎片琐事</option>
+                <option value="DEEP">🟢 高效深度学习</option>
+                <option value="FREE" selected>⚪ 普通空闲</option>
+                <option value="REST">🟣 休息时段</option>
+              </select>
+            </div>
+            <div class="cfg-item">
+              <label>备注（可选）</label>
+              <input type="text" id="pf-title" placeholder="如：高数课 / 通勤" />
+            </div>
+            <div class="cfg-item" style="justify-content:flex-end">
+              <button class="btn btn-primary" id="pf-add">添加时段</button>
+            </div>
+          </div>
+          <div class="once-events">
+            <div class="muted" style="font-size:12px;margin-bottom:6px;">一次性临时事件</div>
+            <div id="once-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 长周期规划 -->
+      <section class="view" id="view-cycle">
+        <!-- 周期配置 -->
+        <div class="card">
+          <div class="card-head">
+            <h3>备考周期配置</h3>
+            <div class="btn-group">
+              <button class="btn btn-primary" id="btn-cycle-generate">生成月度规划</button>
+            </div>
+          </div>
+          <details id="cycle-config-details" open>
+            <summary class="muted" style="cursor:pointer;font-size:13px;">展开 / 收起周期参数（起止日期 · 当前分 · 目标分 · 薄弱项）</summary>
+            <div class="cycle-form">
+              <div class="cfg-item">
+                <label>开始日期</label>
+                <input type="date" id="cy-start" />
+              </div>
+              <div class="cfg-item">
+                <label>考试日期</label>
+                <input type="date" id="cy-end" />
+              </div>
+              <div class="cfg-item">
+                <label>目标总分</label>
+                <input type="number" id="cy-total" min="4" max="9" step="0.5" />
+              </div>
+              <div class="cfg-item cycle-scores">
+                <label>当前分 / 目标分</label>
+                <div class="cy-score-grid" id="cy-score-grid"></div>
+              </div>
+              <div class="cfg-item cycle-weak">
+                <label>薄弱分科（可多选）</label>
+                <div class="cy-weak-row" id="cy-weak-row"></div>
+              </div>
+            </div>
+          </details>
+          <div class="muted" style="font-size:12px;margin-top:8px;">
+            引擎将按你在「时间资源」中标记的真实时段逐月测算可用容量（🔴 上课 / 🟣 休息自动扣除），生成月配额 → 周配额 → 日预算，并把整块空闲切片（如 2h → 50 分钟 + 10 分钟休息 + 50
+            分钟）匹配难度任务。
+          </div>
+        </div>
+
+        <!-- 规划结果 -->
+        <div id="cycle-output">
+          <div class="card">
+            <div class="empty-hint">尚未生成长周期规划。配置好周期后点击「生成月度规划」。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI 排程 -->
+      <section class="view" id="view-plan">
+        <div class="card">
+          <div class="card-head">
+            <h3>AI 学习计划排程引擎</h3>
+            <button class="btn btn-primary" id="btn-generate">生成备考计划</button>
+          </div>
+          <div class="plan-config">
+            <div class="cfg-item">
+              <label>考试日期</label>
+              <input type="date" id="cfg-exam-date" />
+            </div>
+            <div class="cfg-item">
+              <label>每周投入小时</label>
+              <input type="number" id="cfg-hours" value="12" min="1" max="40" />
+            </div>
+            <div class="cfg-item">
+              <label>最小任务块(分钟)</label>
+              <input type="number" id="cfg-min" value="30" min="15" max="120" step="15" />
+            </div>
+            <div class="cfg-item">
+              <label>最大任务块(分钟)</label>
+              <input type="number" id="cfg-max" value="90" min="30" max="240" step="15" />
+            </div>
+            <div class="cfg-item cfg-check">
+              <label><input type="checkbox" id="cfg-weekend" checked /> 周末加量</label>
+            </div>
+            <div class="cfg-item cfg-check">
+              <label><input type="checkbox" id="cfg-evening" /> 避开晚上</label>
+            </div>
+          </div>
+          <div class="plan-output" id="plan-output">
+            <div class="empty-hint">点击「生成备考计划」，AI 将按你的课表空闲块切片排程。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 时间线 -->
+      <section class="view" id="view-timeline">
+        <div class="card">
+          <div class="card-head">
+            <h3>考试流程时间线</h3>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </section>
+
+      <!-- Checklist -->
+      <section class="view" id="view-checklist">
+        <div class="card">
+          <div class="card-head">
+            <h3>考前 Checklist</h3>
+            <span class="muted" id="checklist-progress"></span>
+          </div>
+          <div id="checklist-groups"></div>
+        </div>
+      </section>
+
+      <!-- 听说读写 -->
+      <section class="view" id="view-practice">
+        <div class="card">
+          <div class="card-head">
+            <h3>听说读写练习</h3>
+            <div class="tabs" id="practice-tabs">
+              <button class="tab active" data-sec="R">阅读</button>
+              <button class="tab" data-sec="W">写作</button>
+              <button class="tab" data-sec="L">听力</button>
+              <button class="tab" data-sec="S">口语</button>
+            </div>
+          </div>
+          <div id="practice-body"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 长周期规划：切片任务编辑弹窗 -->
+  <div class="cy-modal-mask" id="cy-modal-mask">
+    <div class="cy-modal">
+      <div class="cy-modal-head">
+        <span id="cy-modal-title">编辑切片任务</span>
+        <button class="cy-modal-x" id="cy-modal-close">×</button>
+      </div>
+      <div class="cy-modal-body">
+        <div class="cy-modal-tags" id="cy-modal-tags"></div>
+        <label class="cy-label">任务标题</label>
+        <input type="text" id="cy-edit-title" class="cy-input" />
+        <label class="cy-label">学习目标</label>
+        <textarea id="cy-edit-objective" class="cy-input" rows="2"></textarea>
+        <div class="cy-time-row">
+          <div>
+            <label class="cy-label">开始</label>
+            <input type="time" id="cy-edit-start" class="cy-input" />
+          </div>
+          <div>
+            <label class="cy-label">结束</label>
+            <input type="time" id="cy-edit-end" class="cy-input" />
+          </div>
+        </div>
+      </div>
+      <div class="cy-modal-foot">
+        <button class="btn btn-ghost" id="cy-btn-todo">未开始</button>
+        <button class="btn btn-ghost" id="cy-btn-partial">部分完成</button>
+        <button class="btn" id="cy-btn-done">✅ 标记完成</button>
+        <span style="flex:1"></span>
+        <button class="btn btn-danger" id="cy-btn-delete">删除</button>
+        <button class="btn btn-primary" id="cy-btn-save">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js?v=2"></script>
+  <script src="js/data.js"></script>
+  <script src="js/assessment.js"></script>
+  <script src="js/schedule.js?v=7"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script src="js/cycle-plan.js?v=2"></script>
+  <script src="js/app.js?v=9"></script>
+</body>
+
+</html>
