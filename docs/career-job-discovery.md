@@ -26,6 +26,7 @@
 - `profile.html`、`profile-store.js`：浏览器本地求职资料和字段复制板；不调用后端保存个人资料。
 - `applications.html`、`application-store.js`：浏览器本地投递记录；支持从岗位列表加入、手动添加、筛选和更新进度。
 - `offers.html`、`offer-store.js`：浏览器本地 Offer 多维对比；由用户设置权重并为每个维度填写评分。
+- `deadlines.html`、`deadline-utils.js`：汇总本地申请截止和 Offer 签约截止，计算站内倒计时。
 
 ## 4. 更新岗位数据
 
@@ -64,6 +65,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Limit
 轻量投递管理使用本地键 `amilingo.career.applications.v1`，允许用户手动记录 `待投递 → 已投递 → 笔试 → 面试 → Offer` 等状态，也保留已入职、已拒绝和已放弃结果。岗位列表按 `sourceJobId` 去重并保留用户已填写的进度和备注；外部岗位可手动添加。该功能不监听企业网站状态，也不自动投递。
 
 Offer 对比使用本地键 `amilingo.career.offers.v1`。用户可分别设置岗位契合、成长空间、薪酬福利、地点与通勤、工作生活和稳定性的 0–5 权重，并对每个 Offer 填写 1–5 分。系统只对已经评分且权重大于 0 的维度计算加权百分制参考分，同时保留事实依据和待核对备注；排名不等于最终选择建议。
+
+截止日期中心不新增存储，只读取本地投递记录和 Offer 中已填写的日期，按逾期、今天、7 天内、30 天内和稍后分类。倒计时按本地日历日期计算，避免时区造成的日期偏移；网页关闭后不会发送系统通知，日期仍需以企业官网或书面 Offer 为准。
 
 ## 6. 数据与合规边界
 
