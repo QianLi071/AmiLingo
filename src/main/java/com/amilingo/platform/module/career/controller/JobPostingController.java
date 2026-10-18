@@ -1,9 +1,11 @@
 package com.amilingo.platform.module.career.controller;
 
 import com.amilingo.platform.common.dto.ApiResponse;
+import com.amilingo.platform.module.career.dto.response.JobDatasetMetadataView;
 import com.amilingo.platform.module.career.dto.response.JobPostingView;
 import com.amilingo.platform.module.career.enums.JobRegion;
 import com.amilingo.platform.module.career.enums.JobType;
+import com.amilingo.platform.module.career.service.JobDatasetMetadataService;
 import com.amilingo.platform.module.career.service.JobPostingService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +21,11 @@ import java.util.List;
 public class JobPostingController {
 
     private final JobPostingService jobPostingService;
+    private final JobDatasetMetadataService metadataService;
 
-    public JobPostingController(JobPostingService jobPostingService) {
+    public JobPostingController(JobPostingService jobPostingService, JobDatasetMetadataService metadataService) {
         this.jobPostingService = jobPostingService;
+        this.metadataService = metadataService;
     }
 
     @GetMapping
@@ -35,5 +39,10 @@ public class JobPostingController {
     @GetMapping("/{id}")
     public ApiResponse<JobPostingView> get(@PathVariable Long id) {
         return ApiResponse.ok(jobPostingService.get(id));
+    }
+
+    @GetMapping("/metadata")
+    public ApiResponse<JobDatasetMetadataView> metadata() {
+        return ApiResponse.ok(metadataService.get());
     }
 }

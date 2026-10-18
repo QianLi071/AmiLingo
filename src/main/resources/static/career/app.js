@@ -24,6 +24,7 @@
     list: document.querySelector("#job-list"),
     status: document.querySelector("#status"),
     count: document.querySelector("#job-count"),
+    freshness: document.querySelector("#data-freshness"),
     panel: document.querySelector("#detail-panel"),
     detailEmpty: document.querySelector("#detail-empty"),
     detailContent: document.querySelector("#detail-content"),
@@ -171,6 +172,22 @@
     }
   }
 
+  async function loadMetadata() {
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/career/jobs/metadata`);
+      const payload = await response.json();
+      if (!response.ok || !payload.success || !payload.data) throw new Error("metadata unavailable");
+      const updated = payload.data.crawledAt ? new Date(payload.data.crawledAt) : null;
+      const readable = updated && !Number.isNaN(updated.getTime())
+        ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium", timeStyle: "short" }).format(updated)
+        : "暂不可用";
+      const warning = payload.data.warnings && payload.data.warnings.length ? "；部分来源本次更新失败" : "";
+      elements.freshness.textContent = `岗位数据更新于 ${readable}${warning}。申请前请再次查看企业官网。`;
+    } catch (_error) {
+      elements.freshness.textContent = "岗位数据更新时间暂不可用，申请前请在企业官网核对。";
+    }
+  }
+
   elements.form.addEventListener("submit", event => {
     event.preventDefault();
     loadJobs();
@@ -195,4 +212,5 @@
   });
 
   loadJobs();
+  loadMetadata();
 })();

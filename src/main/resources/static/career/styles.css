@@ -87,6 +87,7 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px 
 .section-kicker { margin-bottom: 5px; color: var(--primary); }
 .refresh-button { padding: 9px 15px; border-radius: 10px; }
 .status { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+.data-freshness { margin: -4px 0 14px; color: #7a8498; font-size: 12px; line-height: 1.6; }
 .status.error { padding: 14px; color: #a93232; border-radius: 12px; background: #fff0f0; }
 .job-list { display: grid; gap: 12px; }
 
