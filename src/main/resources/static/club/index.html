@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 校园探索与 IEEE-MUST 方向推荐">
+  <title>AmiLingo · 校园探索</title>
+  <link rel="stylesheet" href="./styles.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="返回 AmiLingo 首页"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav aria-label="校园探索导航">
+      <span>Campus Exploration</span>
+      <a href="../career/">就业与实习</a>
+      <a href="./experiences.html">我的参与经历</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">MUST · IEEE Student Branch</p>
+        <h1>先了解，再决定参加什么</h1>
+        <p>根据兴趣、目标和参与方式整理适合探索的方向。结果只用于缩小范围，你仍然可以自由查看和收藏所有方向。</p>
+      </div>
+      <a class="hero-link" href="./experiences.html">记录一次参与经历</a>
+    </section>
+
+    <section class="panel preference-panel" aria-labelledby="preference-title">
+      <div class="section-heading">
+        <div><p class="kicker">Your choice</p><h2 id="preference-title">你现在更想获得什么？</h2></div>
+        <p>没有“正确答案”，也不会限制你浏览其他方向。</p>
+      </div>
+      <form id="preference-form">
+        <fieldset>
+          <legend>主要目标</legend>
+          <div class="choice-row" id="goal-options">
+            <label><input type="radio" name="goal" value="interest" checked><span>单纯探索兴趣</span></label>
+            <label><input type="radio" name="goal" value="competition"><span>参加竞赛</span></label>
+            <label><input type="radio" name="goal" value="graduate"><span>升学与科研</span></label>
+            <label><input type="radio" name="goal" value="career"><span>职业与实习</span></label>
+            <label><input type="radio" name="goal" value="project"><span>做一个项目</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>感兴趣的内容（最多 6 项）</legend>
+          <div class="choice-row" id="interest-options">
+            <label><input type="checkbox" value="mathematics"><span>数学</span></label>
+            <label><input type="checkbox" value="coding"><span>编程</span></label>
+            <label><input type="checkbox" value="data"><span>数据</span></label>
+            <label><input type="checkbox" value="ai"><span>人工智能</span></label>
+            <label><input type="checkbox" value="hardware"><span>硬件</span></label>
+            <label><input type="checkbox" value="robotics"><span>机器人</span></label>
+            <label><input type="checkbox" value="health"><span>医疗健康</span></label>
+            <label><input type="checkbox" value="finance"><span>金融</span></label>
+            <label><input type="checkbox" value="product"><span>产品</span></label>
+            <label><input type="checkbox" value="research"><span>研究</span></label>
+            <label><input type="checkbox" value="writing"><span>表达写作</span></label>
+            <label><input type="checkbox" value="engineering"><span>工程实践</span></label>
+          </div>
+        </fieldset>
+        <div class="compact-fields">
+          <label>每周可投入时间
+            <select id="weekly-hours"><option value="1-2">1–2 小时</option><option value="3-5">3–5 小时</option><option value="6+">6 小时以上</option></select>
+          </label>
+          <fieldset>
+            <legend>喜欢的参与方式</legend>
+            <div class="choice-row" id="mode-options">
+              <label><input type="checkbox" value="individual"><span>个人练习</span></label>
+              <label><input type="checkbox" value="team"><span>团队协作</span></label>
+              <label><input type="checkbox" value="hands-on"><span>动手实践</span></label>
+              <label><input type="checkbox" value="research"><span>研究讨论</span></label>
+              <label><input type="checkbox" value="project"><span>项目推进</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <button class="primary-button" type="submit">更新探索建议</button>
+        <span id="save-status" class="save-status" role="status"></span>
+      </form>
+    </section>
+
+    <section aria-labelledby="groups-title">
+      <div class="section-heading result-heading">
+        <div><p class="kicker">Five directions</p><h2 id="groups-title">IEEE-MUST 五个探索方向</h2></div>
+        <p>排序来自你填写的偏好；不是录取、能力或发展潜力判断。</p>
+      </div>
+      <div id="group-list" class="card-grid"></div>
+    </section>
+
+    <section class="panel activities" aria-labelledby="activities-title">
+      <div class="section-heading">
+        <div><p class="kicker">Planned activities</p><h2 id="activities-title">从一次活动开始</h2></div>
+        <p>以下时间来自 2026–2027 年度计划，均应以社团后续正式通知为准。</p>
+      </div>
+      <div id="activity-list" class="activity-list"></div>
+    </section>
+  </main>
+
+  <template id="group-template">
+    <article class="group-card">
+      <div class="group-top"><span class="rank"></span><button class="save-button" type="button"></button></div>
+      <p class="english-name"></p><h3></h3><p class="summary"></p>
+      <div class="reason-list"></div><p class="starter"></p>
+    </article>
+  </template>
+  <script src="./club-store.js?v=1"></script>
+  <script src="./app.js?v=1"></script>
+</body>
+</html>
