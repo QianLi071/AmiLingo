@@ -19,6 +19,7 @@
 
 - `scripts/career_job_crawler.py`：低频读取配置好的公开招聘页面，统一输出 JSON。
 - `scripts/update_career_jobs.ps1`：安全更新岗位数据；采集失败或结果为空时保留旧文件。
+- `scripts/career_job_audit.py`：替换数据前检查必填字段、HTTPS 官方链接、重复链接、采集时间和截止日期。
 - `src/main/resources/career/job-postings.crawled.json`：采集结果及采集时间。
 - `JobPostingSeedLoader`：应用启动时按 `officialUrl` 同步数据库；同一链接更新而不重复新增。
 - `JobPostingController`：岗位列表、筛选和详情接口。
@@ -42,7 +43,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -LimitPerSource 5
 ```
 
-检查生成的 JSON 后重启 Java 应用，导入器会新增新链接并刷新已有链接对应的岗位。数据源网页结构发生变化时，应修改对应解析函数并先运行 `python .\scripts\test_career_job_crawler.py`。
+更新脚本会先写入临时文件并执行审计；存在不安全链接、重复链接或结构错误时保留原数据。明确截止日期已经过去的岗位会自动设为 `active: false`。检查生成的 JSON 后重启 Java 应用，导入器会新增新链接并刷新已有链接对应的岗位。数据源网页结构发生变化时，应修改对应解析函数，并运行 `python .\scripts\test_career_job_crawler.py` 与 `python .\scripts\test_career_job_audit.py`。
 
 ## 5. 接口
 
