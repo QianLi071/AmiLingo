@@ -25,6 +25,7 @@
 - `src/main/resources/static/career/`：无需构建工具的岗位发现演示页。
 - `profile.html`、`profile-store.js`：浏览器本地求职资料和字段复制板；不调用后端保存个人资料。
 - `applications.html`、`application-store.js`：浏览器本地投递记录；支持从岗位列表加入、手动添加、筛选和更新进度。
+- `offers.html`、`offer-store.js`：浏览器本地 Offer 多维对比；由用户设置权重并为每个维度填写评分。
 
 ## 4. 更新岗位数据
 
@@ -61,6 +62,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Limit
 求职资料助手将常用网申字段保存在当前浏览器的 `localStorage` 中，保存键为 `amilingo.career.profile.v1`。用户必须主动点击复制并在企业页面粘贴、核对；系统不读取外部招聘网页，也不自动填写或提交。页面明确禁止保存证件号码、银行卡、验证码、密码及证件扫描件等高敏感信息，并提供一键清除本地资料。
 
 轻量投递管理使用本地键 `amilingo.career.applications.v1`，允许用户手动记录 `待投递 → 已投递 → 笔试 → 面试 → Offer` 等状态，也保留已入职、已拒绝和已放弃结果。岗位列表按 `sourceJobId` 去重并保留用户已填写的进度和备注；外部岗位可手动添加。该功能不监听企业网站状态，也不自动投递。
+
+Offer 对比使用本地键 `amilingo.career.offers.v1`。用户可分别设置岗位契合、成长空间、薪酬福利、地点与通勤、工作生活和稳定性的 0–5 权重，并对每个 Offer 填写 1–5 分。系统只对已经评分且权重大于 0 的维度计算加权百分制参考分，同时保留事实依据和待核对备注；排名不等于最终选择建议。
 
 ## 6. 数据与合规边界
 
