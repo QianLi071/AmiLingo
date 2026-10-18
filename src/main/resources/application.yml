@@ -23,9 +23,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      password: ${REDIS_PASSWORD:}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: 6379
       timeout: 5000
       lettuce:
         pool:
@@ -34,46 +34,15 @@ spring:
           max-idle: 4
 
 microservice:
-  workerid: ${WORKER_ID:0}
-  dadacenterid: ${DATACENTER_ID:0}
+  workerid: 0
+  dadacenterid: 0
 
-# JWT 签名密钥：必须通过环境变量 JWT_SECRET 注入至少 32 字节的随机字符串。
-# 生成方式：openssl rand -base64 48 或 uuidgen | sha256sum
-# 切勿把真实密钥提交到代码仓库。
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET:YourSecretKeyForJwtTokenGeneration1234567890}
   expiration: ${JWT_EXPIRATION:86400000}
 
-# AI 能力配置
-# ai.provider 选择 AiGateway 实现：
-#   deepseek（默认，无需本地模型/ Python，直接走云端 DeepSeek，适合 models/llama.cpp 留空时）
-#   python（走本地 OfflineAssistant FastAPI → llama.cpp，需要模型与 Python 服务在线）
-#   noop（桩实现，全部不可用）
+# Python 离线 AI 服务（OfflineAssistant / FastAPI）地址
+# Java 端 PythonAiGateway 通过 HTTP 调用此服务完成写作批改等 AI 推理
 ai:
-  # 默认走本地 llama.cpp 小模型（Gemma 4 E2B + Qwen3-Embedding）；
-  # 需要云端模型时设置环境变量 AI_PROVIDER=deepseek
-  provider: ${AI_PROVIDER:python}
-  deepseek:
-    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
-    # DeepSeek API key 强制从环境变量 DEEPSEEK_API_KEY 读取；
-    # 本地开发请在系统环境变量中配置，或在 IDE 启动配置中注入。
-    # 切勿把 key 提交到代码仓库。
-    api-key: ${DEEPSEEK_API_KEY:}
-    model: ${DEEPSEEK_MODEL:deepseek-chat}
-    connect-timeout: 5000
-    read-timeout: 360000
-  # 本地离线 AI：FastAPI 编排层（图片评分等业务端点）+ 两个 llama-server
   python:
-    # FastAPI（OfflineAssistant）：图片作文识别+评分等编排接口
-    base-url: ${AI_PYTHON_BASE_URL:http://127.0.0.1:8000}
-    # llama-server 对话/评分（Gemma 4 E2B，含 --mmproj 多模态）
-    llm-base-url: ${AI_LLM_BASE_URL:http://127.0.0.1:8081}
-    # llama-server 向量（Qwen3-Embedding-0.6B）
-    embedding-base-url: ${AI_EMBEDDING_BASE_URL:http://127.0.0.1:8082}
-    chat-model: ${AI_CHAT_MODEL:local-gemma}
-    embed-model: ${AI_EMBED_MODEL:local-qwen-embed}
-    read-timeout: 600000
-    # 范文库与向量缓存（与原版 Python OfflineAssistant 共用，缓存指纹一致可直接复用）
-    essays-dir: ${AI_ESSAYS_DIR:src/main/python/OfflineAssistant/backend/data/essays}
-    vector-cache-dir: ${AI_VECTOR_CACHE_DIR:src/main/python/OfflineAssistant/backend/data/vector_store}
-
+    base-url: ${AI_PYTHON_BASE_URL:http://localhost:8000}

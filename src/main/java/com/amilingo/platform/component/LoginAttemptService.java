@@ -39,15 +39,9 @@ public class LoginAttemptService {
      * @param identityKey   标识 key（手机号/邮箱/openid 等）
      */
     public void checkLockedOrThrow(String identityKey) {
-        try {
-            if (isLocked(identityKey)) {
-                long remainingMinutes = getRemainingLockMinutes(identityKey);
-                throw new ApiException(HttpStatus.FORBIDDEN,"密码错误次数过多已锁定，请" + remainingMinutes + "分钟后再试");
-            }
-        } catch (ApiException e) {
-            throw e;
-        } catch (Exception e) {
-            // Redis 不可用：不做锁定检查
+        if (isLocked(identityKey)) {
+            long remainingMinutes = getRemainingLockMinutes(identityKey);
+            throw new ApiException(HttpStatus.FORBIDDEN,"密码错误次数过多已锁定，请" + remainingMinutes + "分钟后再试");
         }
     }
 
@@ -61,16 +55,6 @@ public class LoginAttemptService {
     }
 
     public int recordFailedAttempt(String identityKey, int maxAttempts, Duration lockDuration) {
-        try {
-            return doRecordFailedAttempt(identityKey, maxAttempts, lockDuration);
-        } catch (Exception e) {
-            // Redis 不可用：降级为不计数（返回满额剩余次数），登录流程不被阻断
-            log.warn("登录失败计数不可用（Redis 异常），降级放行: {}", e.getMessage());
-            return maxAttempts;
-        }
-    }
-
-    private int doRecordFailedAttempt(String identityKey, int maxAttempts, Duration lockDuration) {
         String attemptKey = ATTEMPT_KEY_PREFIX + identityKey;
         String lockKey = LOCK_KEY_PREFIX + identityKey;
         String token = null;
@@ -115,20 +99,12 @@ public class LoginAttemptService {
      * 登录成功后清除失败计数与锁定状态
      */
     public void clearAttempts(String identityKey) {
-        try {
-            redisTemplate.delete(ATTEMPT_KEY_PREFIX + identityKey);
-            redisTemplate.delete(LOCK_KEY_PREFIX + identityKey);
-        } catch (Exception e) {
-            // Redis 不可用：忽略
-        }
+        redisTemplate.delete(ATTEMPT_KEY_PREFIX + identityKey);
+        redisTemplate.delete(LOCK_KEY_PREFIX + identityKey);
     }
 
     public boolean isLocked(String identityKey) {
-        try {
-            return Boolean.TRUE.equals(redisTemplate.hasKey(LOCK_KEY_PREFIX + identityKey));
-        } catch (Exception e) {
-            return false;
-        }
+        return Boolean.TRUE.equals(redisTemplate.hasKey(LOCK_KEY_PREFIX + identityKey));
     }
 
     public long getRemainingLockMinutes(String identityKey) {

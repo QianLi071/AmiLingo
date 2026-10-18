@@ -39,19 +39,23 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public void saveUser(@NonNull User user) {
-        userRepository.save(user);
-        bestEffortCache(() -> userCacheEngine.cache(user));
+        try {
+            userCacheEngine.cache(user);
+        } catch (CacheException e){
+            User savedUser = userRepository.save(user);
+            log.info("User saved to database: {}", savedUser.getId());
+        }
     }
     @Override
     public User getUserById(@NonNull Long userId) {
         try {
             return userCacheEngine.getCachedById(userId);
-        } catch (Exception e) {
-            log.debug("缓存不可用，从数据库加载用户: {}", userId);
+        } catch (CacheMissedException e) {
+            log.debug("User not in cache, fetching from database: {}", userId);
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                bestEffortCache(() -> userCacheEngine.cache(user));
+                userCacheEngine.cache(user);
                 return user;
             }
         }
@@ -66,7 +70,7 @@ public class UserService implements IUserService {
             Optional<User> userOpt = userRepository.findUserByEmail(email);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                bestEffortCache(() -> userCacheEngine.setUserEmailKey(user));
+                userCacheEngine.setUserEmailKey(user);
                 return user;
             }
         }
@@ -83,7 +87,7 @@ public class UserService implements IUserService {
         User user = getUserByEmail(email);
         if (user != null){
             if (passwordEncoder.matches(password, user.getPasswordHash())){
-                bestEffortCache(() -> userCacheEngine.cache(user));
+                userCacheEngine.cache(user);
                 return user;
             }
             throw new PasswordIncorrectException("");
@@ -107,22 +111,12 @@ public class UserService implements IUserService {
                 .username(request.getName())
                 .passwordHash(hashedPassword)
                 .build();
-        // 数据库必须真实落库；缓存仅尽力，Redis 不可用时降级
         try {
             userRepository.save(user);
+            userCacheEngine.setUserEmailKey(user);
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage());
         }
-        bestEffortCache(() -> userCacheEngine.setUserEmailKey(user));
         return user;
-    }
-
-    /** 缓存尽力而为：Redis 异常只记录日志，不影响真实数据库操作。 */
-    private void bestEffortCache(Runnable action) {
-        try {
-            action.run();
-        } catch (Exception e) {
-            log.warn("Redis 缓存不可用，已降级直连数据库: {}", e.getMessage());
-        }
     }
 }

@@ -37,13 +37,7 @@ public class RateLimitAspect {
         String ip = resolveClientIp();
         String key = buildKey(joinPoint, rateLimit, ip);
 
-        long count;
-        try {
-            count = redisService.incrementAndExpire(key, rateLimit.timeWindow());
-        } catch (Exception e) {
-            // Redis 不可用时降级放行：限流是保护性功能，不应阻断真实业务
-            return joinPoint.proceed();
-        }
+        long count = redisService.incrementAndExpire(key, rateLimit.timeWindow());
         if (count > rateLimit.maxRequests()) {
             throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, rateLimit.message());
         }
