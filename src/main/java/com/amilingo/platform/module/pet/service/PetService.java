@@ -48,24 +48,4 @@ public class PetService implements IPetService {
     public Pet getPetByName(String name) {
         return null;
     }
-
-    /**
-     * 尽力为用户宠物增加经验：宠物存在才处理，不存在/出错均静默跳过（不影响主业务链路）。
-     * 依据新经验重新计算等级。
-     */
-    public void grantExperience(Long userId, long exp) {
-        try {
-            Pet pet = getPetById(userId);
-            if (pet == null || exp <= 0) {
-                return;
-            }
-            long newExp = pet.getExperience() + exp;
-            pet.setExperience(newExp);
-            // 每 500 经验升 1 级
-            pet.setLevel(newExp / 500);
-            petRepository.save(pet);
-        } catch (Exception e) {
-            // 降级：忽略宠物经验异常
-        }
-    }
 }

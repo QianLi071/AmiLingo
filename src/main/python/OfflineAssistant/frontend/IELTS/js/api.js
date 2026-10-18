@@ -2,35 +2,7 @@
  * OfflineAssistant API 客户端
  * 统一封装后端调用、字段映射、降级处理
  */
-// 同源：前端由 Spring Boot 静态托管，后端接口与页面同端口（8080）
-const API_BASE = '/api/v1';
-
-/**
- * 演示账号静默登录（仅本地 Demo）：页面加载时登录，浏览器会自动保存
- * access_token cookie，之后所有同源 fetch 自动携带，无需登录页。
- * @returns {Promise<boolean>} 是否登录成功
- */
-async function ensureDemoLogin() {
-  try {
-    const resp = await fetch(`${API_BASE}/auth/portal/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        loginType: 'EMAIL_PWD',
-        credential: { email: 'demo@amilingo.com', password: '123456' },
-      }),
-    });
-    const json = await resp.json().catch(() => ({}));
-    if (json.success) {
-      console.info('[Demo] 演示账号已登录 demo@amilingo.com');
-    }
-    return !!json.success;
-  } catch (e) {
-    console.warn('[Demo] 演示登录失败:', e.message);
-    return false;
-  }
-}
+const API_BASE = 'http://localhost:8000/api/v1';
 
 /**
  * 调用后端写作评分接口
@@ -137,4 +109,4 @@ async function callWritingGradeImage({ imageBase64, topic, examType = 'IELTS_A',
   };
 }
 
-window.AmiAPI = { callWritingGrade, callWritingGradeImage, ensureDemoLogin, API_BASE };
+window.AmiAPI = { callWritingGrade, callWritingGradeImage, API_BASE };
