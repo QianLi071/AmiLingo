@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record JobPostingView(
-        Long id,
+        String id,
         String companyName,
         String positionTitle,
         JobRegion region,
@@ -24,7 +24,7 @@ public record JobPostingView(
 ) {
     public static JobPostingView from(JobPosting job) {
         return new JobPostingView(
-                job.getId(),
+                String.valueOf(job.getId()),
                 job.getCompanyName(),
                 job.getPositionTitle(),
                 job.getRegion(),

@@ -111,6 +111,8 @@
     officialLink.hidden = !safe;
     const riskLink = document.querySelector("#risk-link");
     riskLink.href = `./risk.html?company=${encodeURIComponent(job.companyName || "")}`;
+    const fitLink = document.querySelector("#fit-link");
+    fitLink.href = `./fit.html?job=${encodeURIComponent(String(job.id))}`;
   }
 
   function renderJobs(jobs) {

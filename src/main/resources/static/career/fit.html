@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 学生岗位匹配分析">
+  <title>AmiLingo · 岗位匹配分析</title>
+  <link rel="stylesheet" href="./styles.css?v=3">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页">
+      <span class="brand-mark">A</span>
+      <span>AmiLingo</span>
+    </a>
+    <nav class="topbar-nav" aria-label="就业模块导航">
+      <a href="./index.html">返回岗位列表</a>
+      <a href="./risk.html">岗位风险检查</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="fit-heading">
+      <div>
+        <p class="section-kicker">Explainable matching</p>
+        <h1>岗位与个人匹配分析</h1>
+        <p>系统只比较你填写的信息与岗位文本，并展示判断依据。它不会预测录用结果，也不会替你决定是否投递。</p>
+      </div>
+      <div id="selected-job" class="selected-job" aria-live="polite">
+        <span>正在读取岗位…</span>
+      </div>
+    </section>
+
+    <section class="fit-layout">
+      <form id="fit-form" class="fit-form-card">
+        <h2>填写你的情况</h2>
+        <p class="form-hint">只填写真实信息；暂时没有工作经历也可以填写课程、项目或社团实践。</p>
+
+        <div class="form-grid">
+          <label class="full">专业名称
+            <input id="major" maxlength="128" required placeholder="例如：计算机科学与技术">
+          </label>
+          <label>期望地区
+            <select id="preferred-region">
+              <option value="">暂不限定</option>
+              <option value="MAINLAND_CHINA">中国内地</option>
+              <option value="HONG_KONG">香港</option>
+              <option value="MACAO">澳门</option>
+            </select>
+          </label>
+          <label>期望岗位类型
+            <select id="preferred-job-type">
+              <option value="">暂不限定</option>
+              <option value="INTERNSHIP">实习</option>
+              <option value="FULL_TIME">全职</option>
+              <option value="GRADUATE_PROGRAM">毕业生项目</option>
+            </select>
+          </label>
+          <label class="full">技能清单
+            <input id="skills" maxlength="1000" required placeholder="用逗号分隔，例如：Java、Python、数据分析">
+            <small>建议填写能用项目、课程或作品证明的技能。</small>
+          </label>
+          <label class="full">相关经历
+            <textarea id="experience-summary" maxlength="2000" rows="5" placeholder="简要写下与岗位有关的项目、课程、实习或社团经历"></textarea>
+          </label>
+          <label class="full">官网完整职位说明（推荐）
+            <textarea id="full-description" maxlength="10000" rows="8" placeholder="岗位摘要较短时，可从企业官网复制职责和申请条件。请勿粘贴个人敏感信息。"></textarea>
+          </label>
+        </div>
+
+        <button id="fit-submit" class="primary-button submit-risk" type="submit" disabled>生成匹配分析</button>
+        <p id="fit-form-status" class="form-status" role="status"></p>
+      </form>
+
+      <aside id="fit-result" class="fit-result empty" aria-live="polite">
+        <div id="fit-placeholder">
+          <span class="detail-icon">✓</span>
+          <h2>等待分析</h2>
+          <p>选择岗位并填写个人情况后，这里会显示匹配依据和准备建议。</p>
+        </div>
+        <div id="fit-content" hidden>
+          <p id="fit-level" class="fit-level"></p>
+          <div class="fit-score"><strong id="fit-score-value"></strong><span>参考分</span></div>
+          <p id="fit-summary" class="fit-summary"></p>
+
+          <section class="result-section">
+            <h3>各项依据</h3>
+            <div id="criterion-list" class="criterion-list"></div>
+          </section>
+          <section class="result-section">
+            <h3>已经匹配的证据</h3>
+            <ul id="evidence-list" class="checklist"></ul>
+          </section>
+          <section class="result-section">
+            <h3>仍需核对</h3>
+            <ul id="verify-list" class="checklist warning-list"></ul>
+          </section>
+          <section class="result-section">
+            <h3>下一步准备</h3>
+            <ul id="action-list" class="checklist"></ul>
+          </section>
+          <p id="fit-disclaimer" class="risk-disclaimer"></p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="./fit.js?v=1"></script>
+</body>
+</html>

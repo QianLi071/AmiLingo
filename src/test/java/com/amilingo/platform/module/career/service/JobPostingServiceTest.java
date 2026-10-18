@@ -46,6 +46,7 @@ class JobPostingServiceTest {
         );
 
         assertEquals(1, result.size());
+        assertEquals("1", result.getFirst().id());
         assertEquals("Software Engineering Intern", result.getFirst().positionTitle());
     }
 

@@ -11,6 +11,7 @@
   → 输入关键词或选择地区、岗位类型
   → GET /api/v1/career/jobs
   → 浏览岗位卡片与详情
+  → 可选：填写个人专业、技能与经历，生成可解释匹配分析
   → 点击“前往企业官方页面”完成申请
 ```
 
@@ -46,11 +47,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Limit
 - `GET /api/v1/career/jobs?jobType=INTERNSHIP`：按岗位类型筛选。
 - `GET /api/v1/career/jobs?keyword=engineer`：按公司、岗位或行业搜索。
 - `GET /api/v1/career/jobs/{id}`：读取岗位详情。
+- `POST /api/v1/career/jobs/{id}/fit-assessments`：比较个人信息与岗位文本，返回匹配依据、待核对项和准备建议。
 - `POST /api/v1/career/risk-assessments`：根据用户已知的客观信息生成风险信号与核实清单。
 
 统一返回 `ApiResponse<T>`。无明确截止日期时 `applicationDeadline` 为 `null`，前端展示“以官网为准”。
 
 风险检查器不会联网查询企业征信，也不会输出“骗子公司”等事实性定性。高权重信号集中在向求职者收费、正式录用前索取敏感资料等招聘行为；公司成立时间、人员规模和登记资本只作为低权重背景信息。
+
+匹配分析不会预测录用概率。参考分只汇总地区、岗位类型、专业方向、技能关键词和经历佐证等可解释维度；公开摘要不足时会降低信息质量等级，并提示用户粘贴官网完整职位说明。岗位 ID 在 API 中以字符串返回，避免雪花 ID 在 JavaScript 中丢失精度。
 
 ## 6. 数据与合规边界
 
