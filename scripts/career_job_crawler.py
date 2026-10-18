@@ -110,7 +110,7 @@ def parse_bytedance_detail(page_html: str, url: str) -> list[dict[str, object]]:
             title=title,
             region="MAINLAND_CHINA",
             industry="Internet / Technology",
-            location="Mainland China (see official page)",
+            location="中国内地（以官网为准）",
             official_url=url,
             source="ByteDance Campus Careers",
             detail="字节跳动校园招聘公开职位，具体职责、城市与要求请查看官方页面。",

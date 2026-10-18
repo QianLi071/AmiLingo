@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Imports the bundled, publicly sourced job samples once per official URL. */
+/** Synchronizes bundled, publicly sourced jobs using the official URL as identity. */
 @Component
 @ConditionalOnProperty(name = "career.seed.enabled", havingValue = "true", matchIfMissing = true)
 public class JobPostingSeedLoader implements ApplicationRunner {
@@ -46,8 +46,8 @@ public class JobPostingSeedLoader implements ApplicationRunner {
             return;
         }
         try (InputStream input = resource.getInputStream()) {
-            int imported = importFrom(input);
-            log.info("Career job seed completed: {} new posting(s) imported", imported);
+            int synchronizedCount = importFrom(input);
+            log.info("Career job seed completed: {} posting(s) synchronized", synchronizedCount);
         }
     }
 
@@ -57,36 +57,37 @@ public class JobPostingSeedLoader implements ApplicationRunner {
             throw new IOException("Career seed file must contain a postings array");
         }
 
-        List<JobPosting> newPostings = new ArrayList<>();
+        List<JobPosting> synchronizedPostings = new ArrayList<>();
         Set<String> urlsInFile = new HashSet<>();
         for (JsonNode node : postingsNode) {
             String officialUrl = requiredText(node, "officialUrl");
-            if (!urlsInFile.add(officialUrl) || repository.findByOfficialUrl(officialUrl).isPresent()) {
+            if (!urlsInFile.add(officialUrl)) {
                 continue;
             }
-            newPostings.add(toEntity(node, officialUrl));
+            JobPosting posting = repository.findByOfficialUrl(officialUrl)
+                    .orElseGet(JobPosting::new);
+            apply(node, officialUrl, posting);
+            synchronizedPostings.add(posting);
         }
-        if (!newPostings.isEmpty()) {
-            repository.saveAll(newPostings);
+        if (!synchronizedPostings.isEmpty()) {
+            repository.saveAll(synchronizedPostings);
         }
-        return newPostings.size();
+        return synchronizedPostings.size();
     }
 
-    private JobPosting toEntity(JsonNode node, String officialUrl) throws IOException {
-        return JobPosting.builder()
-                .companyName(requiredText(node, "companyName"))
-                .positionTitle(requiredText(node, "positionTitle"))
-                .region(parseEnum(JobRegion.class, requiredText(node, "region"), "region"))
-                .jobType(parseEnum(JobType.class, requiredText(node, "jobType"), "jobType"))
-                .industry(optionalText(node, "industry"))
-                .location(optionalText(node, "location"))
-                .description(requiredText(node, "description"))
-                .requirements(optionalText(node, "requirements"))
-                .applicationDeadline(optionalDate(node, "applicationDeadline"))
-                .officialUrl(officialUrl)
-                .sourceName(requiredText(node, "sourceName"))
-                .active(node.path("active").asBoolean(true))
-                .build();
+    private void apply(JsonNode node, String officialUrl, JobPosting posting) throws IOException {
+        posting.setCompanyName(requiredText(node, "companyName"));
+        posting.setPositionTitle(requiredText(node, "positionTitle"));
+        posting.setRegion(parseEnum(JobRegion.class, requiredText(node, "region"), "region"));
+        posting.setJobType(parseEnum(JobType.class, requiredText(node, "jobType"), "jobType"));
+        posting.setIndustry(optionalText(node, "industry"));
+        posting.setLocation(optionalText(node, "location"));
+        posting.setDescription(requiredText(node, "description"));
+        posting.setRequirements(optionalText(node, "requirements"));
+        posting.setApplicationDeadline(optionalDate(node, "applicationDeadline"));
+        posting.setOfficialUrl(officialUrl);
+        posting.setSourceName(requiredText(node, "sourceName"));
+        posting.setActive(node.path("active").asBoolean(true));
     }
 
     private String requiredText(JsonNode node, String field) throws IOException {

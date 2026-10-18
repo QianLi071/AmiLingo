@@ -1008,3 +1008,38 @@ HTTP 层错误不走 ApiResponse（FastAPI 约定）：503/500 → `{"detail": "
 ---
 
 *本文档随迭代持续更新。如有疑问或发现文档与代码不一致，以代码为准并同步更新本文档。*
+
+---
+
+## 二十二、就业岗位发现模块（2026-10-18）
+
+### 22.1 业务链路
+
+```text
+企业公开招聘页
+  → career_job_crawler.py 低频采集并标准化
+  → job-postings.crawled.json
+  → JobPostingSeedLoader 按 officialUrl 新增或刷新
+  → JobPostingRepository 组合筛选
+  → GET /api/v1/career/jobs
+  → /career/ 岗位列表、详情与企业官方申请入口
+```
+
+### 22.2 约束
+
+1. 地区枚举固定为 `MAINLAND_CHINA`、`HONG_KONG`、`MACAO`；岗位类型固定为 `INTERNSHIP`、`FULL_TIME`、`GRADUATE_PROGRAM`。
+2. `officialUrl` 是跨次采集的业务身份。重复链接只刷新内容，不重复新增。
+3. 没有从官网取得明确截止日期时必须保存 `null`，禁止推测。
+4. 平台仅整理信息并跳转企业官网，不代收简历、不自动提交申请。
+5. 新增数据源时先为解析函数增加离线样例测试，再进行低频联网验证。
+
+### 22.3 任务状态
+
+| 任务 | 负责人 | 状态 |
+|---|---|---|
+| 内地、香港、澳门岗位实体与筛选接口 | Yolanda9085 | ✅ 已完成 |
+| 公开招聘页低频采集与统一 JSON | Yolanda9085 | ✅ 已完成 |
+| 按官方链接同步数据库 | Yolanda9085 | ✅ 已完成 |
+| 岗位列表、筛选、详情与官方入口演示页 | Yolanda9085 | ✅ 已完成 |
+| 透明规则岗位风险检查器与核实清单 | Yolanda9085 | ✅ 已完成 |
+| 扩充企业数据源和过期岗位检查 | Yolanda9085 | 🔄 进行中 |
