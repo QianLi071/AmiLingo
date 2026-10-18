@@ -118,6 +118,8 @@
     riskLink.href = `./risk.html?company=${encodeURIComponent(job.companyName || "")}`;
     const fitLink = document.querySelector("#fit-link");
     fitLink.href = `./fit.html?job=${encodeURIComponent(String(job.id))}`;
+    const interviewLink = document.querySelector("#interview-link");
+    interviewLink.href = `./interviews.html?job=${encodeURIComponent(String(job.id))}`;
     const tracked = applicationStore.containsJob(window.localStorage, String(job.id));
     elements.trackJob.textContent = tracked ? "已加入我的投递" : "加入我的投递";
     elements.trackJob.classList.toggle("saved", tracked);
