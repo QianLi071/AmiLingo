@@ -23,6 +23,7 @@
 - `JobPostingSeedLoader`：应用启动时按 `officialUrl` 同步数据库；同一链接更新而不重复新增。
 - `JobPostingController`：岗位列表、筛选和详情接口。
 - `src/main/resources/static/career/`：无需构建工具的岗位发现演示页。
+- `profile.html`、`profile-store.js`：浏览器本地求职资料和字段复制板；不调用后端保存个人资料。
 
 ## 4. 更新岗位数据
 
@@ -55,6 +56,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Limit
 风险检查器不会联网查询企业征信，也不会输出“骗子公司”等事实性定性。高权重信号集中在向求职者收费、正式录用前索取敏感资料等招聘行为；公司成立时间、人员规模和登记资本只作为低权重背景信息。
 
 匹配分析不会预测录用概率。参考分只汇总地区、岗位类型、专业方向、技能关键词和经历佐证等可解释维度；公开摘要不足时会降低信息质量等级，并提示用户粘贴官网完整职位说明。岗位 ID 在 API 中以字符串返回，避免雪花 ID 在 JavaScript 中丢失精度。
+
+求职资料助手将常用网申字段保存在当前浏览器的 `localStorage` 中，保存键为 `amilingo.career.profile.v1`。用户必须主动点击复制并在企业页面粘贴、核对；系统不读取外部招聘网页，也不自动填写或提交。页面明确禁止保存证件号码、银行卡、验证码、密码及证件扫描件等高敏感信息，并提供一键清除本地资料。
 
 ## 6. 数据与合规边界
 
