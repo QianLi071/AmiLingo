@@ -38,6 +38,12 @@
         <h2>填写你的情况</h2>
         <p class="form-hint">只填写真实信息；暂时没有工作经历也可以填写课程、项目或社团实践。</p>
 
+        <div class="fit-imports" aria-label="导入已保存资料">
+          <span>从当前浏览器的已有资料导入：</span>
+          <button id="import-profile" type="button">求职资料</button>
+          <button id="import-club-experiences" type="button">校园参与经历</button>
+        </div>
+
         <div class="form-grid">
           <label class="full">专业名称
             <input id="major" maxlength="128" required placeholder="例如：计算机科学与技术">
@@ -107,6 +113,9 @@
     </section>
   </main>
 
-  <script src="./fit.js?v=1"></script>
+  <script src="./profile-store.js?v=1"></script>
+  <script src="../club/club-store.js?v=1"></script>
+  <script src="./fit-prefill.js?v=1"></script>
+  <script src="./fit.js?v=2"></script>
 </body>
 </html>

@@ -177,6 +177,9 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px 
 .fit-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr); gap: 24px; align-items: start; }
 .fit-form-card, .fit-result { padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 10px 32px rgba(38, 54, 91, 0.06); }
 .fit-form-card h2 { margin: 0 0 8px; }
+.fit-imports { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 22px; padding: 13px 14px; color: var(--muted); font-size: 13px; border: 1px solid var(--line); border-radius: 12px; background: #f8faff; }
+.fit-imports button { padding: 7px 10px; color: var(--primary); font-weight: 700; border: 1px solid #b9caff; border-radius: 9px; background: white; cursor: pointer; }
+.fit-imports button:hover { border-color: var(--primary); background: var(--primary-soft); }
 .fit-form-card textarea { width: 100%; margin-top: 7px; padding: 13px 14px; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; outline: none; resize: vertical; font: inherit; line-height: 1.55; }
 .fit-form-card textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(53, 108, 255, 0.12); }
 .fit-form-card small { display: block; margin-top: 6px; color: var(--muted); line-height: 1.5; }

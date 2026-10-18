@@ -2,6 +2,9 @@
   "use strict";
 
   const API_BASE = window.location.protocol === "file:" ? "http://localhost:8080" : "";
+  const profileStore = window.CareerProfileStore;
+  const clubStore = window.CampusClubStore;
+  const prefill = window.CareerFitPrefill;
   const LEVEL_LABELS = {
     STRONG_MATCH: "匹配证据较充分",
     POSSIBLE_MATCH: "具备部分匹配点",
@@ -20,7 +23,32 @@
   let job = null;
 
   function splitSkills(value) {
-    return Array.from(new Set(value.split(/[，,、;；\n]/).map(item => item.trim()).filter(Boolean))).slice(0, 30);
+    return prefill.splitSkills(value);
+  }
+
+  function reportImport(message, error) {
+    status.className = error ? "form-status error" : "form-status success";
+    status.textContent = message;
+  }
+
+  function importCareerProfile() {
+    const source = prefill.fromCareerProfile(profileStore.load(window.localStorage));
+    const major = document.querySelector("#major");
+    const skills = document.querySelector("#skills");
+    const experience = document.querySelector("#experience-summary");
+    major.value = major.value.trim() || source.major;
+    skills.value = prefill.mergeSkills(skills.value, source.skills);
+    experience.value = prefill.mergeText(experience.value, source.experienceSummary, 2000);
+    const count = [source.major, source.skills, source.experienceSummary].filter(Boolean).length;
+    reportImport(count ? `已导入 ${count} 类求职资料，请确认后再分析。` : "求职资料助手中还没有可导入的内容。", !count);
+  }
+
+  function importClubExperiences() {
+    const items = clubStore.loadExperiences(window.localStorage);
+    const drafts = prefill.fromClubExperiences(items, clubStore.resumeDraft);
+    const experience = document.querySelector("#experience-summary");
+    experience.value = prefill.mergeText(experience.value, drafts, 2000);
+    reportImport(drafts.length ? `已导入 ${drafts.length} 条校园经历草稿，请删去与当前岗位无关的内容。` : "校园探索中还没有可导入的参与经历。", !drafts.length);
   }
 
   function optionalValue(selector) {
@@ -155,6 +183,9 @@
       submit.textContent = "生成匹配分析";
     }
   });
+
+  document.querySelector("#import-profile").addEventListener("click", importCareerProfile);
+  document.querySelector("#import-club-experiences").addEventListener("click", importClubExperiences);
 
   loadJob();
 })();
