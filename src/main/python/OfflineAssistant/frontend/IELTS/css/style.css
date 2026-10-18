@@ -193,44 +193,84 @@ input, textarea { font-family: inherit; font-size: 14px; }
 .task-info .t-title { font-weight: 600; font-size: 13px; }
 .task-info .t-meta { font-size: 12px; color: var(--muted); }
 
-/* Schedule */
+/* Schedule —— 时间资源模块（5 类时段标签） */
 .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 12px; font-size: 13px; flex-wrap: wrap; }
 .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 5px; vertical-align: middle; border: 1px solid; }
-.sw-busy { background: var(--busy); border-color: var(--busy-border); }
-.sw-avail { background: var(--avail); border-color: var(--avail-border); }
+.sw-unavail { background: var(--busy); border-color: var(--busy-border); }
+.sw-fragment { background: #fef3c7; border-color: #fcd34d; }
+.sw-deep { background: var(--avail); border-color: var(--avail-border); }
+.sw-free { background: #f1f5f9; border-color: #cbd5e1; }
+.sw-rest { background: #ede9fe; border-color: #c4b5fd; }
 
-.schedule-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+.schedule-wrap { overflow: auto; max-height: 620px; border: 1px solid var(--border); border-radius: 10px; }
 .schedule-grid {
   display: grid;
-  grid-template-columns: 70px repeat(7, 1fr);
-  min-width: 760px;
+  grid-template-columns: 56px repeat(7, 1fr);
+  min-width: 640px;
 }
 .sched-head {
   background: var(--bg); padding: 8px 4px; text-align: center;
   font-weight: 600; font-size: 12px; border-bottom: 1px solid var(--border);
-  position: sticky; top: 0;
+  position: sticky; top: 0; z-index: 2;
 }
 .sched-head.time { background: #fff; }
-.sched-cell {
+/* 每小时一格（内含 60 个分钟格，用渐变渲染；1 分钟 = 2px） */
+.sched-hour {
+  height: 120px; position: relative; cursor: pointer;
   border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  height: 38px; position: relative; cursor: pointer; transition: background .1s;
 }
-.sched-cell.time-col {
-  font-size: 11px; color: var(--muted); padding: 2px 6px;
-  cursor: default; background: #fff; text-align: right;
+.sched-hour:hover { outline: 1px solid var(--primary-soft); outline-offset: -1px; }
+.sched-hour-label {
+  height: 120px; font-size: 11px; color: var(--muted);
+  padding: 2px 6px; text-align: right; background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky; left: 0; z-index: 1;
 }
-.sched-cell.busy { background: var(--busy); }
-.sched-cell.busy:hover { background: #fecaca; }
-.sched-cell.avail { background: var(--avail); }
-.sched-cell.avail:hover { background: #bbf7d0; }
-.sched-cell:hover { background: var(--primary-soft); }
-.sched-cell.empty:hover { background: var(--primary-soft); }
+.hover-preview {
+  position: absolute; left: 0; right: 0; pointer-events: none;
+  opacity: .55; outline: 1px dashed rgba(0,0,0,.3); z-index: 1;
+}
+
+/* 快速录入工具栏 */
+.sched-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.gran-btn, .type-btn {
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px;
+  background: #fff; font-size: 12px; cursor: pointer;
+}
+.gran-btn.active, .type-btn.active {
+  border-color: var(--primary); background: var(--primary-soft);
+  color: var(--primary-dark); font-weight: 600;
+}
 
 .schedule-summary {
   margin-top: 14px; padding: 12px 16px;
   background: var(--primary-soft); border-radius: 10px;
-  font-size: 13px; display: flex; gap: 20px; flex-wrap: wrap;
+  font-size: 13px; display: flex; gap: 18px; flex-wrap: wrap;
 }
+
+/* 精确录入表单 */
+.precise-form {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  padding: 14px; background: var(--bg); border-radius: 10px; margin-bottom: 14px;
+}
+.precise-form select {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: #fff; width: 100%; font-family: inherit; font-size: 14px;
+}
+.once-events { padding: 4px 2px 0; }
+.once-chip {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 8px 8px 0;
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border);
+}
+.once-chip.unavailable { background: var(--busy); border-color: var(--busy-border); }
+.once-chip.fragment { background: #fef3c7; border-color: #fcd34d; }
+.once-chip.deep { background: var(--avail); border-color: var(--avail-border); }
+.once-chip.free { background: #f1f5f9; border-color: #cbd5e1; }
+.once-chip.rest { background: #ede9fe; border-color: #c4b5fd; }
+.once-del {
+  font-size: 14px; line-height: 1; color: var(--muted); padding: 0 2px;
+}
+.once-del:hover { color: var(--red); }
 
 /* Plan config */
 .plan-config {

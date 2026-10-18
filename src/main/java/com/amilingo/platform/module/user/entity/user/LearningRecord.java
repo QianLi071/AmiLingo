@@ -1,5 +1,6 @@
 package com.amilingo.platform.module.user.entity.user;
 
+import com.amilingo.platform.common.util.Snowflake;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,13 @@ public class LearningRecord {
     @Id
     @Column(name = "record_id", updatable = false, nullable = false, unique = true)
     private Long id;
+
+    @PrePersist
+    void assignId() {
+        if (id == null) {
+            id = Snowflake.nextId();
+        }
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
