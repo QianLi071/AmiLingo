@@ -2,6 +2,7 @@
   "use strict";
 
   const API_BASE = window.location.protocol === "file:" ? "http://localhost:8080" : "";
+  const applicationStore = window.CareerApplicationStore;
   const REGION_LABELS = {
     MAINLAND_CHINA: "中国内地",
     HONG_KONG: "香港",
@@ -26,10 +27,12 @@
     panel: document.querySelector("#detail-panel"),
     detailEmpty: document.querySelector("#detail-empty"),
     detailContent: document.querySelector("#detail-content"),
-    closeDetail: document.querySelector("#close-detail")
+    closeDetail: document.querySelector("#close-detail"),
+    trackJob: document.querySelector("#track-job-button")
   };
 
   let selectedId = null;
+  let selectedJob = null;
 
   function appendTag(container, text, highlighted) {
     if (!text) return;
@@ -82,6 +85,7 @@
 
   function selectJob(job, card) {
     selectedId = String(job.id);
+    selectedJob = job;
     document.querySelectorAll(".job-card").forEach(item => item.classList.toggle("active", item === card));
     elements.detailEmpty.hidden = true;
     elements.detailContent.hidden = false;
@@ -113,6 +117,9 @@
     riskLink.href = `./risk.html?company=${encodeURIComponent(job.companyName || "")}`;
     const fitLink = document.querySelector("#fit-link");
     fitLink.href = `./fit.html?job=${encodeURIComponent(String(job.id))}`;
+    const tracked = applicationStore.containsJob(window.localStorage, String(job.id));
+    elements.trackJob.textContent = tracked ? "已加入我的投递" : "加入我的投递";
+    elements.trackJob.classList.toggle("saved", tracked);
   }
 
   function renderJobs(jobs) {
@@ -175,6 +182,17 @@
   });
   elements.refresh.addEventListener("click", loadJobs);
   elements.closeDetail.addEventListener("click", () => elements.panel.classList.remove("open"));
+  elements.trackJob.addEventListener("click", () => {
+    if (!selectedJob) return;
+    try {
+      applicationStore.addOrUpdateFromJob(window.localStorage, selectedJob);
+      elements.trackJob.textContent = "已加入我的投递";
+      elements.trackJob.classList.add("saved");
+    } catch (error) {
+      elements.status.classList.add("error");
+      elements.status.textContent = `保存失败：${error.message}`;
+    }
+  });
 
   loadJobs();
 })();
