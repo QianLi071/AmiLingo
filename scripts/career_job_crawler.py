@@ -12,10 +12,11 @@ import html as html_module
 import json
 import re
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
@@ -29,6 +30,20 @@ BYTEDANCE_JOBS = (
 )
 WYNN_LISTING_URL = "https://www.wynncareersmacau.com/open-roles/"
 HKJC_LISTING_URL = "https://careers.hkjc.com/go/Apply-Now/7951310/"
+
+PostingParser = Callable[[str, str], list[dict[str, object]]]
+
+
+@dataclass(frozen=True)
+class CareerSource:
+    """One independently fetchable official career source."""
+
+    key: str
+    display_name: str
+    region: str
+    urls: tuple[str, ...]
+    parser: PostingParser
+    listing_page: bool
 
 
 class _TextExtractor(HTMLParser):
@@ -197,6 +212,37 @@ def parse_hkjc_listing(page_html: str, base_url: str = HKJC_LISTING_URL) -> list
     return postings
 
 
+SOURCE_REGISTRY: dict[str, CareerSource] = {
+    source.key: source
+    for source in (
+        CareerSource(
+            key="bytedance",
+            display_name="ByteDance Campus Careers",
+            region="MAINLAND_CHINA",
+            urls=BYTEDANCE_JOBS,
+            parser=parse_bytedance_detail,
+            listing_page=False,
+        ),
+        CareerSource(
+            key="wynn-macau",
+            display_name="Wynn Careers Macau",
+            region="MACAO",
+            urls=(WYNN_LISTING_URL,),
+            parser=parse_wynn_listing,
+            listing_page=True,
+        ),
+        CareerSource(
+            key="hkjc",
+            display_name="HKJC Careers",
+            region="HONG_KONG",
+            urls=(HKJC_LISTING_URL,),
+            parser=parse_hkjc_listing,
+            listing_page=True,
+        ),
+    )
+}
+
+
 def choose_relevant(postings: Iterable[dict[str, object]], limit: int) -> list[dict[str, object]]:
     values = list(postings)
     keywords = ("intern", "graduate", "trainee", "assistant", "engineer", "实习", "毕业")
@@ -205,26 +251,51 @@ def choose_relevant(postings: Iterable[dict[str, object]], limit: int) -> list[d
     return (preferred + remaining)[:limit]
 
 
-def crawl(limit_per_source: int) -> tuple[list[dict[str, object]], list[str]]:
+def resolve_sources(selected_keys: Iterable[str] | None = None) -> list[CareerSource]:
+    keys = list(dict.fromkeys(selected_keys or SOURCE_REGISTRY.keys()))
+    unknown = [key for key in keys if key not in SOURCE_REGISTRY]
+    if unknown:
+        available = ", ".join(SOURCE_REGISTRY)
+        raise ValueError(f"Unknown source(s): {', '.join(unknown)}. Available: {available}")
+    return [SOURCE_REGISTRY[key] for key in keys]
+
+
+def crawl_source(
+    source: CareerSource,
+    limit: int,
+    *,
+    fetcher: Callable[[str], str] = fetch_text,
+    sleeper: Callable[[float], None] = time.sleep,
+) -> tuple[list[dict[str, object]], list[str]]:
+    postings: list[dict[str, object]] = []
+    warnings: list[str] = []
+    urls = source.urls[:1] if source.listing_page else source.urls[:limit]
+    for url in urls:
+        try:
+            parsed = source.parser(fetcher(url), url)
+            postings.extend(choose_relevant(parsed, limit) if source.listing_page else parsed)
+        except Exception as exc:  # One broken page must not discard another source.
+            warnings.append(f"{source.display_name} fetch failed for {url}: {exc}")
+        sleeper(REQUEST_INTERVAL_SECONDS)
+    return postings[:limit], warnings
+
+
+def crawl(
+    limit_per_source: int,
+    selected_sources: Iterable[str] | None = None,
+    *,
+    fetcher: Callable[[str], str] = fetch_text,
+    sleeper: Callable[[float], None] = time.sleep,
+) -> tuple[list[dict[str, object]], list[str]]:
     postings: list[dict[str, object]] = []
     warnings: list[str] = []
 
-    for url in BYTEDANCE_JOBS[:limit_per_source]:
-        try:
-            postings.extend(parse_bytedance_detail(fetch_text(url), url))
-        except Exception as exc:  # A failed source must not discard other sources.
-            warnings.append(f"ByteDance fetch failed for {url}: {exc}")
-        time.sleep(REQUEST_INTERVAL_SECONDS)
-
-    for source_name, url, parser in (
-        ("Wynn", WYNN_LISTING_URL, parse_wynn_listing),
-        ("HKJC", HKJC_LISTING_URL, parse_hkjc_listing),
-    ):
-        try:
-            postings.extend(choose_relevant(parser(fetch_text(url)), limit_per_source))
-        except Exception as exc:
-            warnings.append(f"{source_name} fetch failed for {url}: {exc}")
-        time.sleep(REQUEST_INTERVAL_SECONDS)
+    for source in resolve_sources(selected_sources):
+        source_postings, source_warnings = crawl_source(
+            source, limit_per_source, fetcher=fetcher, sleeper=sleeper
+        )
+        postings.extend(source_postings)
+        warnings.extend(source_warnings)
 
     unique: dict[str, dict[str, object]] = {}
     for posting in postings:
@@ -235,15 +306,33 @@ def crawl(limit_per_source: int) -> tuple[list[dict[str, object]], list[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit-per-source", type=int, default=2)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--source",
+        action="append",
+        choices=tuple(SOURCE_REGISTRY),
+        help="Only crawl this registered source. Repeat to select multiple sources.",
+    )
+    parser.add_argument("--list-sources", action="store_true", help="List registered sources and exit.")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.list_sources:
+        for source in SOURCE_REGISTRY.values():
+            print(f"{source.key}\t{source.region}\t{source.display_name}\t{source.urls[0]}")
+        return 0
+    if args.output is None:
+        parser.error("--output is required unless --list-sources is used")
     if args.limit_per_source < 1 or args.limit_per_source > 10:
         parser.error("--limit-per-source must be between 1 and 10")
 
-    postings, warnings = crawl(args.limit_per_source)
+    selected = resolve_sources(args.source)
+    postings, warnings = crawl(args.limit_per_source, [source.key for source in selected])
     payload = {
         "crawledAt": datetime.now(timezone.utc).isoformat(),
         "notice": "Public career-page data for demonstration. Verify availability on the official page before applying.",
+        "selectedSources": [
+            {"key": source.key, "name": source.display_name, "region": source.region}
+            for source in selected
+        ],
         "count": len(postings),
         "warnings": warnings,
         "postings": postings,

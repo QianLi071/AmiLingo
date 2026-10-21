@@ -45,6 +45,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -LimitPerSource 5
 ```
 
+可以先查看已经注册的官方来源，并只更新其中一部分：
+
+```powershell
+python .\scripts\career_job_crawler.py --list-sources
+powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Sources hkjc,wynn-macau
+```
+
+采集器通过 `SOURCE_REGISTRY` 管理来源。每个来源声明稳定键、显示名称、地区、公开网址、解析函数和页面类型；新增来源时需同时增加解析器离线样例测试。`--source` 可重复使用，单个来源失败只写入警告，不会中断其他来源。
+
 更新脚本会先写入临时文件并执行审计；存在不安全链接、重复链接或结构错误时保留原数据。明确截止日期已经过去的岗位会自动设为 `active: false`。检查生成的 JSON 后重启 Java 应用，导入器会新增新链接并刷新已有链接对应的岗位。数据源网页结构发生变化时，应修改对应解析函数，并运行 `python .\scripts\test_career_job_crawler.py` 与 `python .\scripts\test_career_job_audit.py`。
 
 需要检查当前链接时，可单独生成报告：

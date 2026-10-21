@@ -1,6 +1,9 @@
 param(
     [ValidateRange(1, 10)]
-    [int]$LimitPerSource = 3
+    [int]$LimitPerSource = 3,
+
+    [ValidateSet('bytedance', 'wynn-macau', 'hkjc')]
+    [string[]]$Sources = @()
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,7 +16,11 @@ $auditedCandidate = Join-Path ([System.IO.Path]::GetTempPath()) ('amilingo-caree
 $auditReport = Join-Path ([System.IO.Path]::GetTempPath()) ('amilingo-career-audit-' + [guid]::NewGuid() + '.json')
 
 try {
-    & python $crawler --limit-per-source $LimitPerSource --output $candidate
+    $crawlerArguments = @($crawler, '--limit-per-source', $LimitPerSource, '--output', $candidate)
+    foreach ($source in $Sources) {
+        $crawlerArguments += @('--source', $source)
+    }
+    & python @crawlerArguments
     if ($LASTEXITCODE -ne 0) {
         throw "Career crawler exited with code $LASTEXITCODE"
     }
