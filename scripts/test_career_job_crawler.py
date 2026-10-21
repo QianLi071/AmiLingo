@@ -81,11 +81,61 @@ class CareerJobCrawlerParserTest(unittest.TestCase):
         self.assertIn("Site Reliability Engineer", rows[0]["description"])
         self.assertTrue(rows[0]["officialUrl"].endswith("/it_en.pdf"))
 
+    def test_parse_baidu_embedded_internship_data(self):
+        source = r'''
+        <script>
+        window.__INITIAL_DATA__ = {
+          "listData": {
+            "recruitType": "INTERN",
+            "listDetailData": [{
+              "name": "算法实习生（J100001）",
+              "postId": "e02d76eb-eb2f-4956-b4d2-dacaaaf01ca3",
+              "postType": "技术",
+              "workPlace": "北京市,深圳市",
+              "workContent": "参与搜索算法研发",
+              "serviceCondition": "熟悉 Python",
+              "projectType": "日常实习项目"
+            }]
+          }
+        };
+        </script>
+        '''
+        rows = crawler.parse_baidu_listing(source)
+        self.assertEqual(1, len(rows))
+        self.assertEqual("Baidu", rows[0]["companyName"])
+        self.assertEqual("INTERNSHIP", rows[0]["jobType"])
+        self.assertEqual("北京市,深圳市", rows[0]["location"])
+        self.assertIn("参与搜索算法研发", rows[0]["description"])
+        self.assertEqual(
+            "https://talent.baidu.com/jobs/detail/INTERN/e02d76eb-eb2f-4956-b4d2-dacaaaf01ca3",
+            rows[0]["officialUrl"],
+        )
+
+    def test_parse_baidu_rejects_incomplete_records(self):
+        source = '<script>window.__INITIAL_DATA__ = {"listData":{"recruitType":"INTERN","listDetailData":[{"name":"Missing ID"}]}};</script>'
+        self.assertEqual([], crawler.parse_baidu_listing(source))
+
+    def test_parse_baidu_campus_uses_graduate_detail_path(self):
+        source = r'''<script>window.__INITIAL_DATA__ = {
+          "detailData": {"projectType": undefined},
+          "listData": {"recruitType": "GRADUATE", "listDetailData": [{
+            "name": "机器学习工程师（J100002）",
+            "postId": "13aac31e-1333-418f-a08d-0a2480510882",
+            "postType": "技术", "workPlace": "北京市"
+          }]}
+        };</script>'''
+        rows = crawler.parse_baidu_listing(source)
+        self.assertEqual(1, len(rows))
+        self.assertEqual("GRADUATE_PROGRAM", rows[0]["jobType"])
+        self.assertIn("/jobs/detail/GRADUATE/", rows[0]["officialUrl"])
+
     def test_registry_has_one_official_source_for_each_region(self):
         regions = {source.region for source in crawler.SOURCE_REGISTRY.values()}
         self.assertEqual({"MAINLAND_CHINA", "HONG_KONG", "MACAO"}, regions)
         self.assertIn("mtr", crawler.SOURCE_REGISTRY)
         self.assertIn("sands-china", crawler.SOURCE_REGISTRY)
+        self.assertIn("baidu-internship", crawler.SOURCE_REGISTRY)
+        self.assertIn("baidu-campus", crawler.SOURCE_REGISTRY)
         self.assertEqual(
             ["hkjc", "bytedance"],
             [source.key for source in crawler.resolve_sources(["hkjc", "bytedance", "hkjc"])],

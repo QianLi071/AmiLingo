@@ -34,6 +34,8 @@ MTR_LISTING_URL = "https://careers.mtr.com.hk/careersection/mtr_external/joblist
 SANDS_CHINA_LISTING_URL = (
     "https://en.sandsresortsmacao.com/sands-lifestyle/about-us/job-list.html"
 )
+BAIDU_INTERNSHIP_LISTING_URL = "https://talent.baidu.com/jobs/list?recruitType=INTERN"
+BAIDU_CAMPUS_LISTING_URL = "https://talent.baidu.com/jobs/list?recruitType=GRADUATE"
 
 PostingParser = Callable[[str, str], list[dict[str, object]]]
 
@@ -99,12 +101,13 @@ def make_posting(
     source: str,
     detail: str = "",
     application_deadline: str | None = None,
+    job_type: str | None = None,
 ) -> dict[str, object]:
     return {
         "companyName": company,
         "positionTitle": title,
         "region": region,
-        "jobType": infer_job_type(title, detail),
+        "jobType": job_type or infer_job_type(title, detail),
         "industry": industry,
         "location": location,
         "description": detail or "岗位说明请以企业官方招聘页面为准。",
@@ -331,6 +334,80 @@ def parse_sands_china_listing(
     return postings
 
 
+def _embedded_object_property(
+    page_html: str, variable_name: str, property_name: str
+) -> dict[str, object] | None:
+    """Read one object property even when its surrounding JS object is not strict JSON."""
+    marker_match = re.search(
+        rf"(?:window\.)?{re.escape(variable_name)}\s*=\s*", page_html
+    )
+    if not marker_match:
+        return None
+    property_match = re.search(
+        rf"[\"']{re.escape(property_name)}[\"']\s*:\s*",
+        page_html[marker_match.end():],
+    )
+    if not property_match:
+        return None
+    value_start = marker_match.end() + property_match.end()
+    try:
+        value, _ = json.JSONDecoder().raw_decode(page_html[value_start:])
+    except json.JSONDecodeError:
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def parse_baidu_listing(
+    page_html: str, base_url: str = BAIDU_INTERNSHIP_LISTING_URL
+) -> list[dict[str, object]]:
+    """Parse jobs embedded in Baidu's public server-rendered job list."""
+    list_data = _embedded_object_property(page_html, "__INITIAL_DATA__", "listData")
+    if not list_data:
+        return []
+    records = list_data.get("listDetailData")
+    if not isinstance(records, list):
+        return []
+    recruit_type = str(list_data.get("recruitType") or "").strip().upper()
+    if recruit_type not in {"INTERN", "GRADUATE"}:
+        return []
+
+    postings: list[dict[str, object]] = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        title = str(record.get("name") or "").strip()
+        post_id = str(record.get("postId") or "").strip()
+        if not title or not re.fullmatch(r"[0-9a-fA-F-]{36}", post_id):
+            continue
+        category = str(record.get("postType") or "Technology").strip()
+        location = str(record.get("workPlace") or "中国内地（以官网为准）").strip()
+        duties = str(record.get("workContent") or "").strip()
+        requirements = str(record.get("serviceCondition") or "").strip()
+        default_project = "实习生招聘" if recruit_type == "INTERN" else "校园招聘"
+        project = str(record.get("projectType") or default_project).strip()
+        detail_parts = [f"百度官方{project}；职位类别：{category}。"]
+        if duties:
+            detail_parts.append(f"工作内容：{duties[:600]}")
+        if requirements:
+            detail_parts.append(f"申请条件：{requirements[:600]}")
+        postings.append(
+            make_posting(
+                company="Baidu",
+                title=title,
+                region="MAINLAND_CHINA",
+                industry=category,
+                location=location,
+                official_url=f"https://talent.baidu.com/jobs/detail/{recruit_type}/{post_id}",
+                source="Baidu Talent",
+                detail="\n".join(detail_parts),
+                job_type=(
+                    "INTERNSHIP" if recruit_type == "INTERN" else "GRADUATE_PROGRAM"
+                ),
+            )
+        )
+    return postings
+
+
 SOURCE_REGISTRY: dict[str, CareerSource] = {
     source.key: source
     for source in (
@@ -372,6 +449,22 @@ SOURCE_REGISTRY: dict[str, CareerSource] = {
             region="MACAO",
             urls=(SANDS_CHINA_LISTING_URL,),
             parser=parse_sands_china_listing,
+            listing_page=True,
+        ),
+        CareerSource(
+            key="baidu-internship",
+            display_name="Baidu Talent Internships",
+            region="MAINLAND_CHINA",
+            urls=(BAIDU_INTERNSHIP_LISTING_URL,),
+            parser=parse_baidu_listing,
+            listing_page=True,
+        ),
+        CareerSource(
+            key="baidu-campus",
+            display_name="Baidu Campus Careers",
+            region="MAINLAND_CHINA",
+            urls=(BAIDU_CAMPUS_LISTING_URL,),
+            parser=parse_baidu_listing,
             listing_page=True,
         ),
     )

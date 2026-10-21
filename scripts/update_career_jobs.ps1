@@ -2,7 +2,7 @@ param(
     [ValidateRange(1, 10)]
     [int]$LimitPerSource = 3,
 
-    [ValidateSet('bytedance', 'wynn-macau', 'hkjc', 'mtr', 'sands-china')]
+    [ValidateSet('bytedance', 'wynn-macau', 'hkjc', 'mtr', 'sands-china', 'baidu-internship', 'baidu-campus')]
     [string[]]$Sources = @()
 )
 
