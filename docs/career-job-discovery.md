@@ -49,7 +49,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Limit
 
 ```powershell
 python .\scripts\career_job_crawler.py --list-sources
-powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Sources hkjc,mtr,wynn-macau
+powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Sources hkjc,mtr,wynn-macau,sands-china
 ```
 
 采集器通过 `SOURCE_REGISTRY` 管理来源。每个来源声明稳定键、显示名称、地区、公开网址、解析函数和页面类型；新增来源时需同时增加解析器离线样例测试。`--source` 可重复使用，单个来源失败只写入警告，不会中断其他来源。

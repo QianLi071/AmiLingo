@@ -61,10 +61,31 @@ class CareerJobCrawlerParserTest(unittest.TestCase):
             rows[0]["officialUrl"],
         )
 
+    def test_parse_sands_china_department_document(self):
+        source = """
+        <!-- <p class="hr_sec-title">Old Department</p>
+        <p class="hr_main-text">Old Role</p>
+        <p><a href="https://assets.sandsresortsmacao.cn/content/HR/career/poster/old.pdf">Details</a></p> -->
+        <p class="hr_sec-title">Information Technology</p>
+        <p class="hr_main-text"><span>&bull; Site Reliability Engineer<br />
+        &bull; Senior DevOps Engineer</span></p>
+        <p><a href="https://assets.sandsresortsmacao.cn/content/HR/career/poster/it_en.pdf">Details</a></p>
+        <p class="hr_sec-title">Hotel Operations</p>
+        <p class="hr_main-text">&bull; Butler</p>
+        """
+        rows = crawler.parse_sands_china_listing(source)
+        self.assertEqual(1, len(rows))
+        self.assertEqual("Sands China", rows[0]["companyName"])
+        self.assertEqual("MACAO", rows[0]["region"])
+        self.assertEqual("Information Technology Opportunities", rows[0]["positionTitle"])
+        self.assertIn("Site Reliability Engineer", rows[0]["description"])
+        self.assertTrue(rows[0]["officialUrl"].endswith("/it_en.pdf"))
+
     def test_registry_has_one_official_source_for_each_region(self):
         regions = {source.region for source in crawler.SOURCE_REGISTRY.values()}
         self.assertEqual({"MAINLAND_CHINA", "HONG_KONG", "MACAO"}, regions)
         self.assertIn("mtr", crawler.SOURCE_REGISTRY)
+        self.assertIn("sands-china", crawler.SOURCE_REGISTRY)
         self.assertEqual(
             ["hkjc", "bytedance"],
             [source.key for source in crawler.resolve_sources(["hkjc", "bytedance", "hkjc"])],

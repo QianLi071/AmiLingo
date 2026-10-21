@@ -31,6 +31,9 @@ BYTEDANCE_JOBS = (
 WYNN_LISTING_URL = "https://www.wynncareersmacau.com/open-roles/"
 HKJC_LISTING_URL = "https://careers.hkjc.com/go/Apply-Now/7951310/"
 MTR_LISTING_URL = "https://careers.mtr.com.hk/careersection/mtr_external/joblist.ftl?lang=en"
+SANDS_CHINA_LISTING_URL = (
+    "https://en.sandsresortsmacao.com/sands-lifestyle/about-us/job-list.html"
+)
 
 PostingParser = Callable[[str, str], list[dict[str, object]]]
 
@@ -281,6 +284,53 @@ def parse_mtr_listing(page_html: str, base_url: str = MTR_LISTING_URL) -> list[d
     return postings
 
 
+def parse_sands_china_listing(
+    page_html: str, base_url: str = SANDS_CHINA_LISTING_URL
+) -> list[dict[str, object]]:
+    """Create one transparent entry per department-level official vacancy PDF."""
+    active_html = re.sub(r"<!--.*?-->", "", page_html, flags=re.S)
+    section_pattern = re.compile(
+        r"<p\b[^>]*class=[\"'][^\"']*\bhr_sec-title\b[^\"']*[\"'][^>]*>"
+        r"(.*?)</p>(.*?)(?=<p\b[^>]*class=[\"'][^\"']*\bhr_sec-title\b|$)",
+        flags=re.I | re.S,
+    )
+    postings: list[dict[str, object]] = []
+    for heading, section in section_pattern.findall(active_html):
+        document_match = re.search(
+            r"href=[\"'](https://assets\.sandsresortsmacao\.cn/"
+            r"content/HR/career/poster/[^\"']+\.pdf)[\"']",
+            section,
+            flags=re.I,
+        )
+        roles_match = re.search(
+            r"<p\b[^>]*class=[\"'][^\"']*\bhr_main-text\b[^\"']*[\"'][^>]*>"
+            r"(.*?)</p>",
+            section,
+            flags=re.I | re.S,
+        )
+        department = clean_text(heading)
+        if not document_match or not roles_match or not department:
+            continue
+        roles = clean_text(roles_match.group(1)).replace("•", " · ").strip(" ·")
+        document_url = urljoin(base_url, html_module.unescape(document_match.group(1)))
+        postings.append(
+            make_posting(
+                company="Sands China",
+                title=f"{department} Opportunities",
+                region="MACAO",
+                industry=department,
+                location="Macao",
+                official_url=document_url,
+                source="Sands China Careers",
+                detail=(
+                    f"金沙中国官网当前 {department} 招聘方向：{roles[:500]}。"
+                    "具体职责和申请方式请查看官方职位说明。"
+                ),
+            )
+        )
+    return postings
+
+
 SOURCE_REGISTRY: dict[str, CareerSource] = {
     source.key: source
     for source in (
@@ -316,6 +366,14 @@ SOURCE_REGISTRY: dict[str, CareerSource] = {
             parser=parse_mtr_listing,
             listing_page=True,
         ),
+        CareerSource(
+            key="sands-china",
+            display_name="Sands China Careers",
+            region="MACAO",
+            urls=(SANDS_CHINA_LISTING_URL,),
+            parser=parse_sands_china_listing,
+            listing_page=True,
+        ),
     )
 }
 
@@ -323,7 +381,13 @@ SOURCE_REGISTRY: dict[str, CareerSource] = {
 def choose_relevant(postings: Iterable[dict[str, object]], limit: int) -> list[dict[str, object]]:
     values = list(postings)
     keywords = ("intern", "graduate", "trainee", "assistant", "engineer", "实习", "毕业")
-    preferred = [item for item in values if any(k in str(item["positionTitle"]).lower() for k in keywords)]
+    preferred = [
+        item for item in values
+        if any(
+            keyword in f"{item.get('positionTitle', '')} {item.get('description', '')}".lower()
+            for keyword in keywords
+        )
+    ]
     remaining = [item for item in values if item not in preferred]
     return (preferred + remaining)[:limit]
 
