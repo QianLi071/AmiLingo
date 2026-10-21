@@ -39,9 +39,32 @@ class CareerJobCrawlerParserTest(unittest.TestCase):
         self.assertEqual("Assistant Engineer", rows[0]["positionTitle"])
         self.assertIn("Full-time", rows[0]["description"])
 
+    def test_parse_mtr_taleo_list_with_official_deadline(self):
+        source = """
+        <script>
+        api.fillList('requisitionListInterface', 'listRequisition', [
+          '104343','Graduate Engineer (Ref:260000ZJ)',
+          '104343','Graduate Engineer (Ref:260000ZJ)',
+          '104343','104343','104343','104343','104343',
+          '260000ZJ','Hong Kong','false','','','','',
+          'Full-time','16/Oct/26','29/Oct/26','Apply'
+        ]);
+        </script>
+        """
+        rows = crawler.parse_mtr_listing(source)
+        self.assertEqual(1, len(rows))
+        self.assertEqual("MTR Corporation", rows[0]["companyName"])
+        self.assertEqual("GRADUATE_PROGRAM", rows[0]["jobType"])
+        self.assertEqual("2026-10-29", rows[0]["applicationDeadline"])
+        self.assertEqual(
+            "https://careers.mtr.com.hk/careersection/mtr_external/jobdetail.ftl?job=260000ZJ&lang=en",
+            rows[0]["officialUrl"],
+        )
+
     def test_registry_has_one_official_source_for_each_region(self):
         regions = {source.region for source in crawler.SOURCE_REGISTRY.values()}
         self.assertEqual({"MAINLAND_CHINA", "HONG_KONG", "MACAO"}, regions)
+        self.assertIn("mtr", crawler.SOURCE_REGISTRY)
         self.assertEqual(
             ["hkjc", "bytedance"],
             [source.key for source in crawler.resolve_sources(["hkjc", "bytedance", "hkjc"])],

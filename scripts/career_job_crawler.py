@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Callable, Iterable
-from urllib.parse import urljoin
+from urllib.parse import unquote, urljoin
 from urllib.request import Request, urlopen
 
 
@@ -30,6 +30,7 @@ BYTEDANCE_JOBS = (
 )
 WYNN_LISTING_URL = "https://www.wynncareersmacau.com/open-roles/"
 HKJC_LISTING_URL = "https://careers.hkjc.com/go/Apply-Now/7951310/"
+MTR_LISTING_URL = "https://careers.mtr.com.hk/careersection/mtr_external/joblist.ftl?lang=en"
 
 PostingParser = Callable[[str, str], list[dict[str, object]]]
 
@@ -94,6 +95,7 @@ def make_posting(
     official_url: str,
     source: str,
     detail: str = "",
+    application_deadline: str | None = None,
 ) -> dict[str, object]:
     return {
         "companyName": company,
@@ -104,7 +106,7 @@ def make_posting(
         "location": location,
         "description": detail or "岗位说明请以企业官方招聘页面为准。",
         "requirements": "申请条件及资格要求请以企业官方招聘页面为准。",
-        "applicationDeadline": None,
+        "applicationDeadline": application_deadline,
         "officialUrl": official_url,
         "sourceName": source,
         "active": True,
@@ -212,6 +214,73 @@ def parse_hkjc_listing(page_html: str, base_url: str = HKJC_LISTING_URL) -> list
     return postings
 
 
+def _taleo_date(value: str) -> str | None:
+    match = re.fullmatch(r"(\d{2})/([A-Za-z]{3})/(\d{2})", value.strip())
+    if not match:
+        return None
+    months = {
+        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+    }
+    month = months.get(match.group(2).lower())
+    if month is None:
+        return None
+    try:
+        return datetime(2000 + int(match.group(3)), month, int(match.group(1))).date().isoformat()
+    except ValueError:
+        return None
+
+
+def parse_mtr_listing(page_html: str, base_url: str = MTR_LISTING_URL) -> list[dict[str, object]]:
+    """Parse the public Taleo list embedded in MTR's official careers page."""
+    list_match = re.search(
+        r"api\.fillList\(\s*['\"]requisitionListInterface['\"]\s*,\s*"
+        r"['\"]listRequisition['\"]\s*,\s*\[(.*?)\]\s*\);",
+        page_html,
+        flags=re.I | re.S,
+    )
+    if not list_match:
+        return []
+    values = [unquote(item) for item in re.findall(r"'((?:\\.|[^'])*)'", list_match.group(1))]
+    postings: list[dict[str, object]] = []
+    for index in range(0, max(0, len(values) - 18)):
+        internal_id = values[index]
+        title = values[index + 1].strip()
+        job_number = values[index + 9].strip()
+        location = values[index + 10].strip()
+        schedule = values[index + 16].strip()
+        posted_at = values[index + 17].strip()
+        deadline = _taleo_date(values[index + 18])
+        is_record = (
+            internal_id.isdigit()
+            and values[index + 2] == internal_id
+            and values[index + 3].strip() == title
+            and bool(re.fullmatch(r"[A-Za-z0-9]+", job_number))
+            and _taleo_date(posted_at) is not None
+            and deadline is not None
+        )
+        if not is_record:
+            continue
+        detail_url = (
+            "https://careers.mtr.com.hk/careersection/mtr_external/jobdetail.ftl"
+            f"?job={job_number}&lang=en"
+        )
+        postings.append(
+            make_posting(
+                company="MTR Corporation",
+                title=clean_text(title),
+                region="HONG_KONG",
+                industry="Transport / Infrastructure",
+                location=clean_text(location) or "Hong Kong",
+                official_url=detail_url,
+                source="MTR Careers",
+                detail=f"港铁官方公开职位；工作安排：{clean_text(schedule) or '以官网为准'}。",
+                application_deadline=deadline,
+            )
+        )
+    return postings
+
+
 SOURCE_REGISTRY: dict[str, CareerSource] = {
     source.key: source
     for source in (
@@ -237,6 +306,14 @@ SOURCE_REGISTRY: dict[str, CareerSource] = {
             region="HONG_KONG",
             urls=(HKJC_LISTING_URL,),
             parser=parse_hkjc_listing,
+            listing_page=True,
+        ),
+        CareerSource(
+            key="mtr",
+            display_name="MTR Careers",
+            region="HONG_KONG",
+            urls=(MTR_LISTING_URL,),
+            parser=parse_mtr_listing,
             listing_page=True,
         ),
     )
