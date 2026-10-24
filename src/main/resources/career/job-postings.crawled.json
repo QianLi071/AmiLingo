@@ -1,36 +1,55 @@
 {
-  "crawledAt": "2026-10-21T09:10:41.251354+00:00",
+  "crawledAt": "2026-10-24T16:02:00.924436+00:00",
   "notice": "Public career-page data for demonstration. Verify availability on the official page before applying.",
   "selectedSources": [
-    {
-      "key": "bytedance",
-      "name": "ByteDance Campus Careers",
-      "region": "MAINLAND_CHINA"
-    },
-    {
-      "key": "mtr",
-      "name": "MTR Careers",
-      "region": "HONG_KONG"
-    },
-    {
-      "key": "sands-china",
-      "name": "Sands China Careers",
-      "region": "MACAO"
-    },
     {
       "key": "baidu-internship",
       "name": "Baidu Talent Internships",
       "region": "MAINLAND_CHINA"
-    },
+    }
+  ],
+  "sourceResults": [
     {
-      "key": "baidu-campus",
-      "name": "Baidu Campus Careers",
-      "region": "MAINLAND_CHINA"
+      "key": "baidu-internship",
+      "name": "Baidu Talent Internships",
+      "status": "SUCCESS",
+      "count": 2,
+      "warnings": []
     }
   ],
   "count": 10,
   "warnings": [],
   "postings": [
+    {
+      "companyName": "Baidu",
+      "positionTitle": "平台产品设计与运营实习生（J106535）",
+      "region": "MAINLAND_CHINA",
+      "jobType": "INTERNSHIP",
+      "industry": "产品",
+      "location": "北京市",
+      "description": "百度官方日常实习项目；职位类别：产品。\n工作内容：工作职责:\n1.参与百度智能云AI教育平台相关产品视觉设计；\n2.准确理解产品需求，产出高质量可落地的设计方案；\n3.参与竞品调研分析，平衡用户体验及产品诉求，提出创新设计思考并推动落地；\n4.视频后期制作：负责课程视频的剪辑、字幕校对与添加、成片质检与归档，确保课程视频符合平台质量标准；\n5.教务支持：协助开展日常教务工作，包括课程排期、学员及班级信息维护、学习进度跟踪与数据整理，保障教学运营顺畅。\n申请条件：1.本科及以上学历，计算机、教育、传媒等相关专业优先；\n2.熟练使用剪映、Premiere 等至少一款视频剪辑工具，能独立完成视频剪辑与字幕添加；有 AI 剪辑、AI 字幕等工具使用经验者优先；\n3.具备较强的沟通协调能力和责任心，工作细致，能耐心处理教务与评审中的琐碎事务，善于推动多方协作闭环；\n4.每周实习不少于5天，实习期不少于6个月，能尽快到岗者优先。",
+      "requirements": "申请条件及资格要求请以企业官方招聘页面为准。",
+      "applicationDeadline": null,
+      "officialUrl": "https://talent.baidu.com/jobs/detail/INTERN/319522c9-8a02-4c2b-95b3-dff67bdc81e5",
+      "sourceName": "Baidu Talent",
+      "active": true,
+      "sourceKey": "baidu-internship"
+    },
+    {
+      "companyName": "Baidu",
+      "positionTitle": "LLM算法/机器学习/AIGC算法（J106790）",
+      "region": "MAINLAND_CHINA",
+      "jobType": "INTERNSHIP",
+      "industry": "技术",
+      "location": "北京市,上海市",
+      "description": "百度官方日常实习项目；职位类别：技术。\n工作内容：-本岗位聚焦搜索广告创意图片方向，参与 AIGC 广告创意图片生成的核心算法研究与落地。将多模态大模型、文生图/图生图、强化学习等前沿技术应用于真实广告创意场景，持续提升创意图片的生成质量、相关性与商业转化效果\n-你将深度参与以下一个或多个方向的研发工作\n-参与工业级Harness Agent全链路研发：基于 Agent Workflow 进行提示词规划与多路并行生图，结合 SFT、DPO、RL 等方法提升生成图片的质量、多样性与业务贴合度\n-参与Agentic AI架构研究与演进：攻克Agentic RL在 Long-Horizon Tasks的一系列核心难点，诸如Sparse Rewards、Credit Assignment、Planning & Decomposition\n-以及训练稳定性上同步/异步RL、rollout效率等问题图文相关性与多模态理解\n-参与图文相关性建模、向量检索与多模态表征学习，保障创意图片与广告内容、搜索意图的一致性；创意质量与合规审核\n-参与低质过滤、文字乱码/违规检测等自动化审核能力建设，持续降低低质率、保障创意安全可控\n申请条件：-2027 届及以后本科及以上学历在读，人工智能、计算机、自动化、数学等相关专业优先\n-扎实的数据结构与算法基础，熟练掌握 Python，熟悉 PyTorch 等主流深度学习框架；熟悉多模态大模型、扩散生成模型（文生图/图生图）、计算机视觉、NLP、强化学习中的一个或多个方向，有相关研究或工程经验者优先\n-有 AIGC、图像生成、图文相关性、RLHF/DPO、Agent 等相关项目经验，或在 CVPR、ICCV、NeurIPS、ICLR、SIGGRAPH 等顶会发表论文者优先；良好的英文读写能力与数学基础，能够快速跟踪并复现前沿论文；责任心强，积极主动，具备良好的沟通表达与团队协作能力",
+      "requirements": "申请条件及资格要求请以企业官方招聘页面为准。",
+      "applicationDeadline": null,
+      "officialUrl": "https://talent.baidu.com/jobs/detail/INTERN/adf587e6-9538-4ce2-8386-dde18c8559c3",
+      "sourceName": "Baidu Talent",
+      "active": true,
+      "sourceKey": "baidu-internship"
+    },
     {
       "companyName": "ByteDance",
       "positionTitle": "系统软件实习生-服务器",
@@ -43,7 +62,8 @@
       "applicationDeadline": null,
       "officialUrl": "https://jobs.bytedance.com/campus/position/7595142586517293365/detail",
       "sourceName": "ByteDance Campus Careers",
-      "active": true
+      "active": true,
+      "sourceKey": "bytedance"
     },
     {
       "companyName": "ByteDance",
@@ -57,7 +77,8 @@
       "applicationDeadline": null,
       "officialUrl": "https://jobs.bytedance.com/campus/position/7602148466978244917/detail",
       "sourceName": "ByteDance Campus Careers",
-      "active": true
+      "active": true,
+      "sourceKey": "bytedance"
     },
     {
       "companyName": "MTR Corporation",
@@ -71,7 +92,8 @@
       "applicationDeadline": "2026-10-29",
       "officialUrl": "https://careers.mtr.com.hk/careersection/mtr_external/jobdetail.ftl?job=260000ZJ&lang=en",
       "sourceName": "MTR Careers",
-      "active": true
+      "active": true,
+      "sourceKey": "mtr"
     },
     {
       "companyName": "MTR Corporation",
@@ -85,7 +107,8 @@
       "applicationDeadline": "2026-10-29",
       "officialUrl": "https://careers.mtr.com.hk/careersection/mtr_external/jobdetail.ftl?job=260000Z7&lang=en",
       "sourceName": "MTR Careers",
-      "active": true
+      "active": true,
+      "sourceKey": "mtr"
     },
     {
       "companyName": "Sands China",
@@ -99,7 +122,8 @@
       "applicationDeadline": null,
       "officialUrl": "https://assets.sandsresortsmacao.cn/content/HR/career/poster/administration_en.pdf",
       "sourceName": "Sands China Careers",
-      "active": true
+      "active": true,
+      "sourceKey": "sands-china"
     },
     {
       "companyName": "Sands China",
@@ -113,35 +137,8 @@
       "applicationDeadline": null,
       "officialUrl": "https://assets.sandsresortsmacao.cn/content/HR/career/poster/it_en.pdf",
       "sourceName": "Sands China Careers",
-      "active": true
-    },
-    {
-      "companyName": "Baidu",
-      "positionTitle": "电商商家运营实习生（J106697）",
-      "region": "MAINLAND_CHINA",
-      "jobType": "INTERNSHIP",
-      "industry": "产品",
-      "location": "北京市,杭州市",
-      "description": "百度官方日常实习项目；职位类别：产品。\n工作内容：-协助整理商家信息，包括不限于入驻、日常经营数据等\n-对商家进行日常运营管理，包括不限于活动提报、传递平台最新玩法、治理提示、开播辅助、解封报白等\n-对商家经营提出建议，包括不限于直播话术、直播间画面调整、营销工具使用等\n-收集商家经营痛点，提炼整理共性需求，提报产品、规则功能改进等\n申请条件：-熟练使用offic，尤其表格工具\n-对数据敏感，可协助业务通过后台圈选跑数\n-有责任心，对电商、直播电商行业热爱",
-      "requirements": "申请条件及资格要求请以企业官方招聘页面为准。",
-      "applicationDeadline": null,
-      "officialUrl": "https://talent.baidu.com/jobs/detail/INTERN/e02d76eb-eb2f-4956-b4d2-dacaaaf01ca3",
-      "sourceName": "Baidu Talent",
-      "active": true
-    },
-    {
-      "companyName": "Baidu",
-      "positionTitle": "Agent策略工程师（J106592）",
-      "region": "MAINLAND_CHINA",
-      "jobType": "INTERNSHIP",
-      "industry": "技术",
-      "location": "北京市",
-      "description": "百度官方日常实习项目；职位类别：技术。\n工作内容：-参与健康内容生成Agent的策略设计与迭代，构建基于Agentic Looping的自动化问题巡检与效果自进化机制，驱动生成质量持续提升\n-参与Agent核心工具（医生/药品检索等）的任务化调度与智能路由策略，优化多工具协同机制，保障在线生成的响应时效与结果准确性\n-参与搭建Agent链路的Harness工程体系，量化评估模型与策略变更影响，确保在线服务的安全性与稳定性\n-跟踪大模型与Agent前沿技术，主导新技术在健康场景中的快速实验验证与规模化工程落地\n申请条件：-计算机相关专业本科及以上学历，扎实的编程功底与复杂系统设计能力\n-理解Agent核心体系（Planning、Tool Use、Memory、Reflection），具备Agentic Looping的系统化思维与落地经验者优先\n-熟练掌握大模型微调与对齐技术（SFT/DPO/RLHF），有实际的数据工程、训练调参与效果评估全流程经验者优先\n-具备Harness工程、自进化数据闭环或大规模推理系统工程实践背景；有健康/医疗场景或IR、知识图谱经验者优先",
-      "requirements": "申请条件及资格要求请以企业官方招聘页面为准。",
-      "applicationDeadline": null,
-      "officialUrl": "https://talent.baidu.com/jobs/detail/INTERN/f8f8f186-2d4a-4b55-9f6c-34018f476896",
-      "sourceName": "Baidu Talent",
-      "active": true
+      "active": true,
+      "sourceKey": "sands-china"
     },
     {
       "companyName": "Baidu",
@@ -155,7 +152,8 @@
       "applicationDeadline": null,
       "officialUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/423c0fa3-a0f3-4def-a882-7466d3685b79",
       "sourceName": "Baidu Talent",
-      "active": true
+      "active": true,
+      "sourceKey": "baidu-campus"
     },
     {
       "companyName": "Baidu",
@@ -169,11 +167,21 @@
       "applicationDeadline": null,
       "officialUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/6061be03-f92b-4430-a1b8-9168de0f91f6",
       "sourceName": "Baidu Talent",
-      "active": true
+      "active": true,
+      "sourceKey": "baidu-campus"
     }
   ],
+  "mergeSummary": {
+    "retainedExistingCount": 8,
+    "retainedBySource": {
+      "ByteDance Campus Careers": 2,
+      "MTR Careers": 2,
+      "Sands China Careers": 2,
+      "Baidu Talent": 2
+    }
+  },
   "audit": {
-    "auditedAt": "2026-10-21T09:10:41.381924+00:00",
+    "auditedAt": "2026-10-24T16:02:01.165384+00:00",
     "errorCount": 0,
     "warningCount": 0,
     "deactivatedExpiredCount": 0

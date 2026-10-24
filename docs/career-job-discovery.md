@@ -20,6 +20,7 @@
 - `scripts/career_job_crawler.py`：低频读取配置好的公开招聘页面，统一输出 JSON。
 - `scripts/update_career_jobs.ps1`：安全更新岗位数据；采集失败或结果为空时保留旧文件。
 - `scripts/career_job_audit.py`：替换数据前检查必填字段、HTTPS 官方链接、重复链接、采集时间和截止日期。
+- `scripts/career_job_merge.py`：增量合并本次采集与上次审计数据，保留未选择或临时失败来源的已有岗位。
 - `scripts/career_job_link_checker.py`：按需低频检查官方链接并生成报告；单次失败只进入人工复核，不自动下架。
 - `src/main/resources/career/job-postings.crawled.json`：采集结果及采集时间。
 - `JobPostingSeedLoader`：应用启动时按 `officialUrl` 同步数据库；同一链接更新而不重复新增。
@@ -54,9 +55,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\update_career_jobs.ps1 -Sourc
 
 采集器通过 `SOURCE_REGISTRY` 管理来源。每个来源声明稳定键、显示名称、地区、公开网址、解析函数和页面类型；新增来源时需同时增加解析器离线样例测试。`--source` 可重复使用，单个来源失败只写入警告，不会中断其他来源。
 
+每条采集岗位都带有稳定的 `sourceKey`，用于区分同一企业官网内的不同招聘通道（例如百度实习与百度校招）。`sourceName` 仅用于界面展示，不能作为增量替换的身份字段。
+
 当前演示数据选用能够稳定公开读取的字节跳动、百度实习、百度校招、港铁及金沙中国来源，覆盖中国内地、香港和澳门。暂时无法稳定读取的来源仍保留在注册表中供后续复核，但不写入本轮演示数据，也不会通过关闭证书验证或绕过访问限制强行采集。
 
-更新脚本会先写入临时文件并执行审计；存在不安全链接、重复链接或结构错误时保留原数据。明确截止日期已经过去的岗位会自动设为 `active: false`。检查生成的 JSON 后重启 Java 应用，导入器会新增新链接并刷新已有链接对应的岗位。数据源网页结构发生变化时，应修改对应解析函数，并运行 `python .\scripts\test_career_job_crawler.py` 与 `python .\scripts\test_career_job_audit.py`。
+更新脚本会先写入临时文件并与上一次审计数据增量合并：成功来源替换旧快照，未选择来源继续保留，临时失败、空结果或部分失败来源保留已有岗位。合并后再执行审计；存在不安全链接、重复链接或结构错误时保留原数据。明确截止日期已经过去的岗位会自动设为 `active: false`。检查生成的 JSON 后重启 Java 应用，导入器会新增新链接并刷新已有链接对应的岗位。数据源网页结构发生变化时，应修改对应解析函数，并运行 `python .\scripts\test_career_job_crawler.py`、`python .\scripts\test_career_job_merge.py` 与 `python .\scripts\test_career_job_audit.py`。
 
 需要检查当前链接时，可单独生成报告：
 

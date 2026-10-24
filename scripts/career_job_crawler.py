@@ -507,6 +507,8 @@ def crawl_source(
     for url in urls:
         try:
             parsed = source.parser(fetcher(url), url)
+            for posting in parsed:
+                posting["sourceKey"] = source.key
             postings.extend(choose_relevant(parsed, limit) if source.listing_page else parsed)
         except Exception as exc:  # One broken page must not discard another source.
             warnings.append(f"{source.display_name} fetch failed for {url}: {exc}")
@@ -521,20 +523,57 @@ def crawl(
     fetcher: Callable[[str], str] = fetch_text,
     sleeper: Callable[[float], None] = time.sleep,
 ) -> tuple[list[dict[str, object]], list[str]]:
+    postings, warnings, _results = crawl_detailed(
+        limit_per_source,
+        selected_sources,
+        fetcher=fetcher,
+        sleeper=sleeper,
+    )
+    return postings, warnings
+
+
+def crawl_detailed(
+    limit_per_source: int,
+    selected_sources: Iterable[str] | None = None,
+    *,
+    fetcher: Callable[[str], str] = fetch_text,
+    sleeper: Callable[[float], None] = time.sleep,
+) -> tuple[list[dict[str, object]], list[str], list[dict[str, object]]]:
     postings: list[dict[str, object]] = []
     warnings: list[str] = []
+    results: list[dict[str, object]] = []
 
     for source in resolve_sources(selected_sources):
         source_postings, source_warnings = crawl_source(
             source, limit_per_source, fetcher=fetcher, sleeper=sleeper
         )
+        if source_warnings and source_postings:
+            status = "PARTIAL"
+        elif source_warnings:
+            status = "FAILED"
+        elif source_postings:
+            status = "SUCCESS"
+        else:
+            status = "EMPTY"
+            source_warnings = [
+                f"{source.display_name} returned no parseable postings; previous data should be kept."
+            ]
         postings.extend(source_postings)
         warnings.extend(source_warnings)
+        results.append(
+            {
+                "key": source.key,
+                "name": source.display_name,
+                "status": status,
+                "count": len(source_postings),
+                "warnings": source_warnings,
+            }
+        )
 
     unique: dict[str, dict[str, object]] = {}
     for posting in postings:
         unique[str(posting["officialUrl"])] = posting
-    return list(unique.values()), warnings
+    return list(unique.values()), warnings, results
 
 
 def main() -> int:
@@ -559,7 +598,9 @@ def main() -> int:
         parser.error("--limit-per-source must be between 1 and 10")
 
     selected = resolve_sources(args.source)
-    postings, warnings = crawl(args.limit_per_source, [source.key for source in selected])
+    postings, warnings, source_results = crawl_detailed(
+        args.limit_per_source, [source.key for source in selected]
+    )
     payload = {
         "crawledAt": datetime.now(timezone.utc).isoformat(),
         "notice": "Public career-page data for demonstration. Verify availability on the official page before applying.",
@@ -567,6 +608,7 @@ def main() -> int:
             {"key": source.key, "name": source.display_name, "region": source.region}
             for source in selected
         ],
+        "sourceResults": source_results,
         "count": len(postings),
         "warnings": warnings,
         "postings": postings,
