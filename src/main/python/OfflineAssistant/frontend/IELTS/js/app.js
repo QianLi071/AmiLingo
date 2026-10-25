@@ -4,7 +4,8 @@
 
 const VIEW_META = {
   dashboard: { title: '仪表盘', sub: '雅思备考全流程陪跑' },
-  schedule: { title: '课表管理', sub: '录入有课/空闲时段，AI 据此切片排程' },
+  schedule: { title: '时间资源', sub: '录入 24h 时段与类型标签，AI 据此切片排程' },
+  cycle: { title: '长周期规划', sub: '自定义备考周期 → 月配额 → 周配额 → 日切片任务' },
   plan: { title: 'AI 排程引擎', sub: '按空闲块生成 N 周学习任务' },
   timeline: { title: '考试流程时间线', sub: 'T-180 至 T+15 全节点提醒' },
   checklist: { title: '考前 Checklist', sub: '证件 / 通勤 / 物品逐项检查' },
@@ -118,13 +119,21 @@ function renderDashboard() {
     `;
   }).join('');
 
-  // 今日任务（取计划第一天的数据，若无则显示默认）
+  // 今日任务（优先读真实后端计划，无则显示默认）
   $('#today-date').textContent = fmtDate(new Date());
-  const plan = window.__cachedPlan;
   let todayTasks = [];
-  if (plan && plan.weeks && plan.weeks[0]) {
-    const d = plan.weeks[0].days[0];
-    todayTasks = d ? d.blocks : [];
+  const remotePlan = window.__remotePlan;
+  const todayStr = fmtDate(new Date());
+  if (remotePlan && remotePlan.tasks) {
+    todayTasks = remotePlan.tasks
+      .filter(t => t.start.slice(0, 10) === todayStr)
+      .map(t => ({
+        category: SEC_TO_CAT[t.section] || 'vocab',
+        title: t.title,
+        start: t.start.slice(11, 16),
+        end: t.end.slice(11, 16),
+        minutes: t.durationMinutes,
+      }));
   }
   if (todayTasks.length === 0) {
     todayTasks = [
@@ -147,33 +156,271 @@ function partLabel(k) {
   return { L: '听力', R: '阅读', W: '写作', S: '口语' }[k];
 }
 
-/* ---------- 课表页 ---------- */
+/* ---------- 时间资源页 ---------- */
 function initSchedulePage() {
   $('#btn-clear-schedule').addEventListener('click', () => {
     Schedule.clear();
-    toast('课表已清空');
+    toast('已清空全部时段');
   });
-  $('#btn-save-schedule').addEventListener('click', () => {
-    toast('课表已保存，可前往「AI 排程」生成计划');
+
+  // 精确录入：循环规则切换（周循环=选星期；一次性=选日期）
+  $('#pf-recurrence').addEventListener('change', (e) => {
+    const once = e.target.value === 'ONCE';
+    $('#pf-day-wrap').style.display = once ? 'none' : '';
+    $('#pf-date-wrap').style.display = once ? '' : 'none';
+  });
+  $('#pf-add').addEventListener('click', () => {
+    const recurrence = $('#pf-recurrence').value;
+    const ok = Schedule.addPreciseBlock({
+      recurrence,
+      dayOfWeek: +$('#pf-day').value,
+      date: $('#pf-date').value,
+      startTime: $('#pf-start').value,
+      endTime: $('#pf-end').value,
+      typeKey: $('#pf-type').value,
+      title: $('#pf-title').value.trim(),
+    });
+    if (ok) toast('已添加时段（保存后生效到排程）');
+  });
+
+  $('#btn-save-schedule').addEventListener('click', async () => {
+    const blocks = collectBusyBlocks();
+    try {
+      if (window.AmiAPI && window.AmiAPI.ensureDemoLogin) {
+        await window.AmiAPI.ensureDemoLogin();
+      }
+      const resp = await fetch('/api/v1/schedule', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blocks }),
+      });
+      const json = await resp.json();
+      if (json.success) {
+        toast(`已保存 ${blocks.length} 个时段块，AI 排程将按类型标签分配任务`);
+      } else {
+        toast('保存失败：' + (json.message || '未知错误'));
+      }
+    } catch (e) {
+      toast('保存失败：' + e.message);
+    }
   });
 }
 
 /* ---------- AI 排程页 ---------- */
+
+/** 分钟数 → "HH:MM"（1440 分钟即 24:00，落库时收敛为 23:59）。 */
+function toHM(mins) {
+  if (mins >= 24 * 60) return '23:59';
+  const h = String(Math.floor(mins / 60)).padStart(2, '0');
+  const m = String(mins % 60).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+/** 把时间资源状态合并成后端 BlockInput 列表（周网格分钟级合并 + 一次性临时事件）。 */
+function collectBusyBlocks() {
+  const blocks = [];
+  const state = window.Schedule.state();
+  const types = window.Schedule.types;
+  const MINS = window.Schedule.minutesPerDay;
+
+  // 周循环：同一天的同类型连续分钟合并为一个块
+  for (let d = 0; d < 7; d++) {
+    const row = state[d] || [];
+    let runStart = -1, runType = 0;
+    for (let m = 0; m <= MINS; m++) {
+      const t = m < MINS ? row[m] : 0;
+      if (t !== 0 && t === runType) continue;      // 延续当前 run
+      if (runType !== 0) {                          // 结束一个 run
+        blocks.push({
+          dayOfWeek: d + 1, // JS 0=周一 → 后端 1=周一
+          startTime: toHM(runStart),
+          endTime: toHM(m),
+          blockType: types[runType - 1].key,
+          title: types[runType - 1].name,
+          recurrence: 'WEEKLY',
+        });
+      }
+      runStart = t !== 0 ? m : -1;
+      runType = t;
+    }
+  }
+
+  // 一次性临时事件
+  (window.Schedule.onceEvents() || []).forEach(ev => {
+    blocks.push({
+      dayOfWeek: ev.dayOfWeek,
+      startTime: toHM(ev.startMin),
+      endTime: toHM(ev.endMin),
+      blockType: types[ev.typeIdx - 1].key,
+      title: ev.title || types[ev.typeIdx - 1].name,
+      recurrence: 'ONCE',
+      specificDate: ev.date,
+    });
+  });
+
+  return blocks;
+}
+
 function initPlanPage() {
   $('#cfg-exam-date').value = EXAM_GOAL.exam_date;
-  $('#btn-generate').addEventListener('click', () => {
-    const cfg = {
-      examDate: $('#cfg-exam-date').value,
-      weeklyHours: +$('#cfg-hours').value,
-      minBlock: +$('#cfg-min').value,
-      maxBlock: +$('#cfg-max').value,
-      weekendExtra: $('#cfg-weekend').checked,
-      avoidEvening: $('#cfg-evening').checked,
-    };
-    const result = Scheduler.generatePlan(cfg);
-    window.__cachedPlan = result;
-    renderPlan(result);
-    renderDashboard(); // 同步今日任务
+  $('#btn-generate').addEventListener('click', () => generateRemotePlan());
+}
+
+/** 调真实 Java 排程引擎并渲染。 */
+async function generateRemotePlan() {
+  const btn = $('#btn-generate');
+  btn.disabled = true;
+  btn.textContent = '引擎排程中…';
+  try {
+    if (window.AmiAPI && window.AmiAPI.ensureDemoLogin) {
+      await window.AmiAPI.ensureDemoLogin();
+    }
+    const resp = await fetch('/api/v1/planner/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        examType: 'IELTS',
+        examDate: $('#cfg-exam-date').value,
+        weeklyHours: +$('#cfg-hours').value,
+      }),
+    });
+    const json = await resp.json();
+    if (!json.success) {
+      throw new Error(json.message || '生成失败');
+    }
+    window.__remotePlan = json.data;
+    renderRemotePlan(json.data);
+    syncTodayTasks();
+    toast(`计划已生成：${json.data.taskCount} 个任务，点击任务可勾选完成`);
+  } catch (e) {
+    toast('生成失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成备考计划';
+  }
+}
+
+/** 页面加载时：已有计划则展示，否则自动生成一次。 */
+async function bootstrapRemotePlan() {
+  try {
+    const resp = await fetch('/api/v1/planner/current');
+    const json = await resp.json();
+    if (json.success && json.data && json.data.taskCount > 0) {
+      window.__remotePlan = json.data;
+      renderRemotePlan(json.data);
+      syncTodayTasks();
+      return;
+    }
+  } catch (e) { /* ignore，继续自动生成 */ }
+  await generateRemotePlan();
+}
+
+/** 勾选 / 取消勾选任务（真实落库）。 */
+async function toggleRemoteTask(taskId) {
+  try {
+    const resp = await fetch(`/api/v1/planner/tasks/${taskId}/toggle`, { method: 'POST' });
+    const json = await resp.json();
+    if (json.success && json.data) {
+      window.__remotePlan = json.data;
+      renderRemotePlan(json.data);
+      syncTodayTasks();
+    }
+  } catch (e) {
+    toast('操作失败：' + e.message);
+  }
+}
+
+/** 把远程计划同步给仪表盘「今日任务」。 */
+function syncTodayTasks() {
+  renderDashboard();
+}
+
+const SEC_TO_CAT = { L: 'listening', R: 'reading', W: 'writing', S: 'speaking' };
+const STAGE_NAME = { FOUNDATION: '基础期', INTENSIVE: '强化期', SPRINT: '冲刺期' };
+
+/** 渲染真实后端返回的扁平任务：按周 → 按日分组。 */
+function renderRemotePlan(data) {
+  const out = $('#plan-output');
+  out.innerHTML = '';
+
+  // 本周目标横幅
+  if (data.weeklyGoal) {
+    const banner = document.createElement('div');
+    banner.className = 'warnings';
+    banner.style.background = '#eff6ff';
+    banner.style.color = '#1d4ed8';
+    banner.textContent = '🎯 ' + data.weeklyGoal;
+    out.appendChild(banner);
+  }
+  if (data.warnings && data.warnings.length) {
+    const warn = document.createElement('div');
+    warn.className = 'warnings';
+    warn.innerHTML = `⚠️ ${data.warnings.join('<br>⚠️ ')}`;
+    out.appendChild(warn);
+  }
+
+  const todayStr = fmtDate(new Date());
+  // weekIndex -> (date -> tasks)
+  const weekMap = new Map();
+  for (const t of data.tasks) {
+    const d = t.start.slice(0, 10);
+    const diff = daysBetween(new Date(todayStr), new Date(d));
+    const wIdx = Math.max(0, Math.floor(diff / 7));
+    if (!weekMap.has(wIdx)) weekMap.set(wIdx, new Map());
+    const dm = weekMap.get(wIdx);
+    if (!dm.has(d)) dm.set(d, []);
+    dm.get(d).push(t);
+  }
+
+  [...weekMap.entries()].sort((a, b) => a[0] - b[0]).forEach(([wIdx, dm]) => {
+    const stages = new Set();
+    let count = 0;
+    dm.forEach(v => v.forEach(t => { stages.add(t.stage); count++; }));
+    const stageText = [...stages].map(s => STAGE_NAME[s] || s).join('/');
+
+    const weekEl = document.createElement('div');
+    weekEl.className = 'week-block';
+    weekEl.innerHTML = `
+      <div class="week-title">
+        <span>第 ${wIdx + 1} 周 · ${stageText}</span>
+        <span class="stage">${count} 个任务</span>
+      </div>
+    `;
+
+    [...dm.entries()].sort((a, b) => a[0].localeCompare(b[0])).forEach(([d, tasks]) => {
+      const dow = (new Date(d).getDay() + 6) % 7; // 0=周一
+      const dayEl = document.createElement('div');
+      dayEl.className = 'day-row';
+
+      const chipsHtml = tasks
+        .slice().sort((a, b) => a.start.localeCompare(b.start))
+        .map(t => {
+          const cat = SEC_TO_CAT[t.section] || 'vocab';
+          const opacity = t.done ? '0.55' : '1';
+          const deco = t.done ? 'text-decoration:line-through;' : '';
+          return `
+            <span class="task-chip" data-task-id="${t.taskId}"
+              style="background:${catBg(cat)};color:${catFg(cat)};opacity:${opacity};${deco}cursor:pointer"
+              title="点击${t.done ? '取消勾选' : '勾选完成'}">
+              <span class="time">${t.start.slice(11, 16)}-${t.end.slice(11, 16)}</span>
+              ${CATEGORIES[cat] ? CATEGORIES[cat].name : t.section}·${t.title}${t.done ? ' ✅' : ''}
+            </span>
+          `;
+        }).join('');
+
+      dayEl.innerHTML = `
+        <div class="day-label">${DAYS[dow]}<br><span class="muted" style="font-size:11px">${d.slice(5)}</span></div>
+        <div class="day-blocks">${chipsHtml || '<span class="muted" style="font-size:12px">无安排</span>'}</div>
+      `;
+      weekEl.appendChild(dayEl);
+    });
+
+    out.appendChild(weekEl);
+  });
+
+  // 点击任务 → toggle
+  out.querySelectorAll('.task-chip[data-task-id]').forEach(chip => {
+    chip.addEventListener('click', () => toggleRemoteTask(chip.dataset.taskId));
   });
 }
 
@@ -589,6 +836,18 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDashboard();
   renderTimeline();
 
-  // 默认生成一次计划填充今日任务
-  $('#btn-generate').click();
+  // 默认拉取真实计划（未登录先静默登录演示账号；无计划则引擎实时生成）
+  (async () => {
+    if (window.AmiAPI && window.AmiAPI.ensureDemoLogin) {
+      try { await window.AmiAPI.ensureDemoLogin(); } catch (e) { /* 提示由接口处理 */ }
+    }
+    // 登录后回填该用户已保存的课表；新用户课表默认空白，由用户自己点选时间
+    await Schedule.loadRemote();
+    // 优先拉取长周期规划；无周期规划时再回退到旧版 AI 排程自动生成
+    let hasCycle = false;
+    if (window.CyclePlan) {
+      try { hasCycle = await window.CyclePlan.bootstrap(); } catch (e) { /* ignore */ }
+    }
+    if (!hasCycle) await bootstrapRemotePlan();
+  })();
 });
