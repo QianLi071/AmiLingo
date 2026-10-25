@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 可解释 Offer 对比">
+  <title>AmiLingo · Offer 对比</title>
+  <link rel="stylesheet" href="./styles.css?v=6">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav class="topbar-nav" aria-label="就业模块导航">
+      <a href="./index.html">岗位列表</a>
+      <a href="./applications.html">我的投递</a>
+      <a href="./deadlines.html">截止日期</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="offer-hero">
+      <div>
+        <p class="section-kicker">Explainable offer comparison</p>
+        <h1>Offer 对比</h1>
+        <p>先设定你真正重视的维度，再逐项填写已有证据。结果展示计算过程，不替你决定最终选择。</p>
+      </div>
+      <div class="privacy-card"><strong>最多对比 10 个 Offer</strong><span>数据仅保存在当前浏览器；薪资币种不同，请先自行换算后再评价。</span></div>
+    </section>
+
+    <section class="offer-layout">
+      <aside class="offer-settings">
+        <h2>我的决策权重</h2>
+        <p class="form-hint">0 表示暂不参与计算，5 表示非常重要。</p>
+        <div id="weight-list" class="weight-list"></div>
+        <div class="offer-safety-note">评分只能整理你的偏好。签约前仍需核对合同、薪资结构、试用期、工作许可和违约条款。</div>
+      </aside>
+
+      <div class="offer-main">
+        <section class="offer-add-card">
+          <div class="card-heading">
+            <div><h2>加入待比较 Offer</h2><p>可从“我的投递”导入，也可手动添加。</p></div>
+          </div>
+          <div class="offer-import-row">
+            <select id="application-offer-select"><option value="">选择已进入 Offer 阶段的记录</option></select>
+            <button id="import-offer" class="primary-button" type="button">导入</button>
+            <button id="toggle-offer-form" class="secondary-button inline-secondary" type="button">手动添加</button>
+          </div>
+          <form id="manual-offer-form" class="manual-offer-form" hidden>
+            <div class="form-grid">
+              <label>公司名称<input id="offer-company" maxlength="128" required></label>
+              <label>岗位名称<input id="offer-position" maxlength="128" required></label>
+              <label>签约截止<input id="offer-deadline" type="date"></label>
+            </div>
+            <button class="primary-button" type="submit">添加 Offer</button>
+          </form>
+          <p id="offer-status" class="form-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section id="offer-ranking" class="offer-ranking" hidden>
+          <div class="card-heading"><div><h2>当前比较结果</h2><p>只根据已评分维度和当前权重计算。</p></div></div>
+          <div id="ranking-list" class="ranking-list"></div>
+        </section>
+
+        <div id="offer-list" class="offer-list"></div>
+        <div id="offer-empty" class="application-empty">
+          <span class="detail-icon">⇄</span><h2>还没有可比较的 Offer</h2>
+          <p>添加后，分别对岗位契合、成长、薪酬、地点、工作生活和稳定性进行评分。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./application-store.js?v=1"></script>
+  <script src="./offer-store.js?v=1"></script>
+  <script src="./offers.js?v=1"></script>
+</body>
+</html>

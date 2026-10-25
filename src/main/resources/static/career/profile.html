@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 浏览器本地求职资料与网申字段复制助手">
+  <title>AmiLingo · 求职资料助手</title>
+  <link rel="stylesheet" href="./styles.css?v=5">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页">
+      <span class="brand-mark">A</span>
+      <span>AmiLingo</span>
+    </a>
+    <nav class="topbar-nav" aria-label="就业模块导航">
+      <a href="./index.html">岗位列表</a>
+      <a href="./applications.html">我的投递</a>
+      <a href="./offers.html">Offer 对比</a>
+      <a href="./deadlines.html">截止日期</a>
+      <a href="./fit.html">匹配分析</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="profile-hero">
+      <div>
+        <p class="section-kicker">Local-first application helper</p>
+        <h1>求职资料助手</h1>
+        <p>把网申中经常重复填写的内容整理成个人复制板。点击字段即可复制，再由你亲自粘贴并确认。</p>
+      </div>
+      <div class="privacy-card">
+        <strong>仅保存在当前浏览器</strong>
+        <span>不会上传到 AmiLingo 后端，也不会自动提交网申。</span>
+        <a class="hero-inline-link" href="./data-center.html">备份或迁移本地资料 →</a>
+      </div>
+    </section>
+
+    <section class="profile-layout">
+      <form id="profile-form" class="profile-form-card" autocomplete="on">
+        <div class="card-heading">
+          <div>
+            <h2>维护常用资料</h2>
+            <p>保存后，可在右侧按字段搜索和复制。</p>
+          </div>
+          <span id="completion-badge" class="completion-badge">0 项已填写</span>
+        </div>
+
+        <fieldset class="profile-fieldset">
+          <legend>基本联系信息</legend>
+          <div class="form-grid">
+            <label>姓名<input id="full-name" autocomplete="name" maxlength="100" placeholder="中文或证件姓名"></label>
+            <label>英文名 / 常用名<input id="preferred-name" maxlength="100" placeholder="如适用"></label>
+            <label>电话<input id="phone" autocomplete="tel" maxlength="60" placeholder="包含地区代码更方便"></label>
+            <label>邮箱<input id="email" type="email" autocomplete="email" maxlength="160" placeholder="name@example.com"></label>
+            <label>当前城市<input id="current-city" autocomplete="address-level2" maxlength="100" placeholder="例如：澳门 / 香港"></label>
+            <label>作品集或个人主页<input id="portfolio-url" type="url" maxlength="500" placeholder="https://"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="profile-fieldset">
+          <legend>教育信息</legend>
+          <div class="form-grid">
+            <label>学校<input id="school" maxlength="160" placeholder="学校全称"></label>
+            <label>专业<input id="profile-major" maxlength="160" placeholder="专业全称"></label>
+            <label>学历
+              <select id="degree">
+                <option value="">请选择</option>
+                <option value="专科">专科</option>
+                <option value="本科">本科</option>
+                <option value="硕士">硕士</option>
+                <option value="博士">博士</option>
+                <option value="其他">其他</option>
+              </select>
+            </label>
+            <label>毕业年月<input id="graduation-month" type="month"></label>
+            <label>GPA / 成绩说明<input id="gpa" maxlength="40" placeholder="例如：3.6/4.0"></label>
+            <label>语言能力<input id="language-ability" maxlength="500" placeholder="例如：普通话、粤语、英语 IELTS 7.0"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="profile-fieldset">
+          <legend>常用申请内容</legend>
+          <div class="form-grid">
+            <label class="full">核心技能<input id="key-skills" maxlength="1000" placeholder="例如：Java、Python、数据分析、英语"></label>
+            <label class="full">自我介绍<textarea id="self-introduction" maxlength="3000" rows="5" placeholder="准备一版可再针对岗位修改的基础介绍"></textarea></label>
+            <label class="full">项目或经历亮点<textarea id="project-highlight" maxlength="3000" rows="5" placeholder="使用行动、方法和结果描述一段代表性经历"></textarea></label>
+            <label class="full">到岗时间 / 可实习周期<input id="availability" maxlength="500" placeholder="例如：2027年1月起，每周4天，可连续6个月"></label>
+          </div>
+        </fieldset>
+
+        <div class="sensitive-warning">
+          <strong>请不要保存：</strong>身份证或护照号码、银行卡、验证码、账号密码、证件扫描件等高敏感信息。
+        </div>
+        <div class="profile-actions">
+          <button class="primary-button" type="submit">保存到当前浏览器</button>
+          <button id="clear-profile" class="danger-button" type="button">清除本地资料</button>
+        </div>
+        <p id="profile-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="copy-board">
+        <div class="card-heading">
+          <div>
+            <h2>网申复制板</h2>
+            <p>复制后请在企业页面再次核对。</p>
+          </div>
+        </div>
+        <label class="copy-search">
+          <span class="sr-only">搜索字段</span>
+          <input id="field-search" type="search" placeholder="搜索姓名、学校、技能……">
+        </label>
+        <div id="copy-list" class="copy-list"></div>
+        <p id="copy-empty" class="copy-empty">先在左侧填写并保存资料。</p>
+      </aside>
+    </section>
+  </main>
+
+  <script src="./profile-store.js?v=1"></script>
+  <script src="./profile.js?v=1"></script>
+</body>
+</html>
