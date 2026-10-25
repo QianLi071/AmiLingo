@@ -1,0 +1,30 @@
+name: Sync upstream dev branch
+on:
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 必须开启，否则无法push回你的fork仓库
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync upstream
+        run: |
+          git remote add upstream https://github.com/QianLi071/AmiLingo.git
+          git fetch upstream
+          git fetch origin
+          
+          # 优先切换，不存在就新建分支，从上游dev拉起点
+          if git show-ref --verify --quiet refs/heads/dev; then
+            git checkout dev
+          else
+            git checkout -b dev upstream/dev
+          fi
+          
+          git merge upstream/dev --no-edit
+          git push origin dev
