@@ -129,3 +129,60 @@ feature/zone-career  ← D开发
 feature/zone-interest← D或E
 feature/frontend     ← E开发
 ```
+
+---
+
+## 补充接口文档：论文 / 专利 / 科研项目台账模块
+
+> 以下三个模块为学术成果台账，独立于宠物成长主流程，供用户记录和管理个人学术经历。
+> 响应体统一使用 `Result<T>` 包装：`{ "code": 200, "message": "ok", "data": ... }`
+
+---
+
+### 论文台账 `/api/paper`
+
+```
+GET    /api/paper?userId={userId}   查询用户所有论文
+GET    /api/paper/{id}              查询单条论文
+POST   /api/paper                   新增论文
+PUT    /api/paper/{id}              更新论文
+DELETE /api/paper/{id}              删除论文
+```
+
+请求/响应字段：`id, userId, title, authorOrder, journal, level, status, submissionDate, acceptanceDate, publicationDate, doi, attachments`
+
+- `level`: SCI Q1 / SCI Q2 / EI / CCF-A / CCF-B / 核心期刊 / 普通期刊
+- `status`: WRITING / SUBMITTED / ACCEPTED / PUBLISHED
+
+---
+
+### 专利台账 `/api/patent`
+
+```
+GET    /api/patent?userId={userId}  查询用户所有专利
+GET    /api/patent/{id}             查询单条专利
+POST   /api/patent                  新增专利
+PUT    /api/patent/{id}             更新专利
+DELETE /api/patent/{id}             删除专利
+```
+
+请求/响应字段：`id, userId, name, type, applicationNumber, grantNumber, inventorOrder, status, applicationDate, grantDate, attachments`
+
+- `type`: INVENTION / UTILITY / DESIGN
+- `status`: APPLIED / SUBSTANTIVE_EXAM / GRANTED / REJECTED
+
+---
+
+### 科研项目台账 `/api/research`
+
+```
+GET    /api/research?userId={userId} 查询用户所有科研项目
+GET    /api/research/{id}            查询单条科研项目
+POST   /api/research                 新增科研项目
+PUT    /api/research/{id}            更新科研项目
+DELETE /api/research/{id}            删除科研项目
+```
+
+请求/响应字段：`id, userId, projectName, role, supervisor, laboratory, startDate, endDate, status, outcome, attachments`
+
+- `status`: ONGOING / COMPLETED / SUSPENDED
