@@ -1,0 +1,2 @@
+package com.amilingo.platform.module.patent.repository;import com.amilingo.platform.module.patent.entity.PatentDocument;import org.springframework.data.jpa.repository.JpaRepository;import java.util.List;
+public interface PatentDocumentRepository extends JpaRepository<PatentDocument,Long>{List<PatentDocument> findByPatentIdAndStatusOrderByCreatedAtDesc(Long patentId,String status);List<PatentDocument> findByPatentIdAndCategoryAndStatusOrderByCreatedAtDesc(Long patentId,String category,String status);}
