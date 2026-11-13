@@ -32,8 +32,8 @@ public class PaperController {
 
     /** 按 ID 查询单条论文 */
     @GetMapping("/{id}")
-    public Result<PaperDTO> getById(@PathVariable Long id) {
-        return service.findById(id)
+    public Result<PaperDTO> getById(@PathVariable Long id, @RequestParam Long actorUserId) {
+        return service.findById(id, actorUserId)
                 .<Result<PaperDTO>>map(Result::ok)
                 .orElse(Result.notFound("论文不存在，id=" + id));
     }
@@ -55,8 +55,8 @@ public class PaperController {
 
     /** 删除论文 */
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
-        return service.delete(id)
+    public Result<Void> delete(@PathVariable Long id, @RequestParam Long actorUserId) {
+        return service.delete(id, actorUserId)
                 ? Result.ok()
                 : Result.notFound("论文不存在，id=" + id);
     }
