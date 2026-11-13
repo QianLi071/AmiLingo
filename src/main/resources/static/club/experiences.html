@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="记录校园活动、项目与社团参与经历">
+  <title>AmiLingo · 我的参与经历</title>
+  <link rel="stylesheet" href="./styles.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="返回 AmiLingo 首页"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav><span>Campus Exploration</span><a href="./">探索方向</a><a href="../career/">就业与实习</a></nav>
+  </header>
+  <main>
+    <section class="page-intro">
+      <p class="eyebrow">Experience record</p><h1>把参与过程记下来</h1>
+      <p>记录你实际做过的事情、结果与反思。系统只整理你填写的内容，不会替你虚构成果。</p>
+    </section>
+    <div class="experience-layout">
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="section-heading"><div><p class="kicker">New record</p><h2 id="form-title">经历记录</h2></div><button id="reset-form" class="text-button" type="button">新建</button></div>
+        <form id="experience-form">
+          <input id="experience-id" type="hidden">
+          <label>活动或项目名称 *<input id="activity-name" maxlength="120" required placeholder="例如：春季代码竞赛"></label>
+          <label>所属方向或组织<input id="group-name" maxlength="80" placeholder="例如：IEEE-MUST 算法组"></label>
+          <label>你的角色<input id="role" maxlength="80" placeholder="例如：队员、负责人、宣传志愿者"></label>
+          <div class="date-row"><label>开始日期<input id="start-date" type="date"></label><label>结束日期<input id="end-date" type="date"></label></div>
+          <label>你具体做了什么<textarea id="actions" maxlength="1200" rows="4" placeholder="写下任务、方法和协作过程"></textarea></label>
+          <label>产生了什么结果<textarea id="outcome" maxlength="800" rows="3" placeholder="可以是作品、改进、反馈或可验证的数量"></textarea></label>
+          <label>使用或提升的能力<input id="skills" maxlength="400" placeholder="例如：Python、建模、演讲、团队协作"></label>
+          <label>你的反思<textarea id="reflection" maxlength="1200" rows="3" placeholder="下一次想保持或改进什么"></textarea></label>
+          <button class="primary-button" type="submit">保存经历</button><span id="form-status" class="save-status" role="status"></span>
+        </form>
+      </section>
+      <section class="records" aria-labelledby="records-title">
+        <div class="section-heading"><div><p class="kicker">My records</p><h2 id="records-title">已记录的经历</h2></div><p>仅保存在当前浏览器</p></div>
+        <div id="record-list" class="record-list"></div>
+      </section>
+    </div>
+  </main>
+  <script src="./club-store.js?v=1"></script><script src="./experiences.js?v=1"></script>
+</body>
+</html>

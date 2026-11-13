@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 求职截止日期中心">
+  <title>AmiLingo · 截止日期</title>
+  <link rel="stylesheet" href="./styles.css?v=7">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav class="topbar-nav" aria-label="就业模块导航"><a href="./index.html">岗位列表</a><a href="./applications.html">我的投递</a><a href="./offers.html">Offer 对比</a></nav>
+  </header>
+
+  <main>
+    <section class="deadline-hero">
+      <div><p class="section-kicker">Deadline overview</p><h1>截止日期中心</h1><p>集中查看已经记录的岗位申请截止和 Offer 签约截止，按紧急程度排列。</p></div>
+      <div class="application-total"><strong id="urgent-count">0</strong><span>项在 7 天内到期</span></div>
+    </section>
+
+    <section class="deadline-workspace">
+      <div class="deadline-toolbar">
+        <div><h2>时间线</h2><p id="today-label"></p></div>
+        <label><span class="filter-label">显示范围</span><select id="deadline-filter"><option value="">全部</option><option value="ACTIVE">未到期</option><option value="OVERDUE">已逾期</option><option value="OFFER">只看 Offer</option><option value="APPLICATION">只看申请</option></select></label>
+      </div>
+      <div id="deadline-summary" class="deadline-summary"></div>
+      <div id="deadline-list" class="deadline-list"></div>
+      <div id="deadline-empty" class="application-empty" hidden><span class="detail-icon">◷</span><h2>暂时没有截止日期</h2><p>在“我的投递”或“Offer 对比”中补充日期后，会自动显示在这里。</p></div>
+      <p class="local-data-note">本页只在打开时计算倒计时，不会在网页关闭后发送系统通知。截止日期仍应以企业官网或书面 Offer 为准。</p>
+    </section>
+  </main>
+
+  <script src="./application-store.js?v=1"></script>
+  <script src="./offer-store.js?v=1"></script>
+  <script src="./deadline-utils.js?v=1"></script>
+  <script src="./deadlines.js?v=1"></script>
+</body>
+</html>

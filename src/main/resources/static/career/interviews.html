@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 原创面试练习与个人复盘">
+  <title>AmiLingo · 面试准备与复盘</title>
+  <link rel="stylesheet" href="./styles.css?v=8">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav class="topbar-nav" aria-label="就业模块导航"><a href="./index.html">岗位列表</a><a href="./applications.html">我的投递</a><a href="./profile.html">求职资料助手</a><a href="../club/">校园探索</a></nav>
+  </header>
+  <main>
+    <section class="profile-hero interview-hero">
+      <div><p class="section-kicker">Interview practice</p><h1>面试准备与复盘</h1><p>使用原创通用问题练习表达，记录证据和改进点。这里不是企业真题库，也不会预测面试结果。</p></div>
+      <div class="privacy-card"><strong>仅保存在当前浏览器</strong><span>回答、自评与复盘不会上传后端。</span></div>
+    </section>
+    <section class="interview-layout">
+      <aside class="session-sidebar">
+        <form id="new-session-form" class="session-form">
+          <h2>新建练习</h2>
+          <label>公司<input id="session-company" maxlength="128" placeholder="可选"></label>
+          <label>岗位名称 *<input id="session-position" maxlength="128" required placeholder="例如：数据分析实习生"></label>
+          <button class="primary-button" type="submit">生成原创练习问题</button>
+        </form>
+        <div class="session-heading"><h2>练习记录</h2><span id="session-count"></span></div>
+        <div id="session-list" class="session-list"></div>
+      </aside>
+      <section class="interview-workspace">
+        <div id="interview-empty" class="interview-empty"><span class="detail-icon">◎</span><h2>选择或新建一场练习</h2><p>从岗位详情进入时，会自动带入公司和岗位名称。</p></div>
+        <div id="interview-content" hidden>
+          <div class="interview-title"><div><p id="interview-company" class="section-kicker"></p><h2 id="interview-position"></h2></div><div><button id="copy-review" class="text-button" type="button">复制复盘</button><button id="delete-session" class="danger-button" type="button">删除</button></div></div>
+          <p class="interview-note">建议先口头回答，再写下要点。评分是你的自我检查，不是 AI 或招聘方评价。</p>
+          <div id="question-list" class="question-list"></div>
+          <section id="review-panel" class="review-panel"><h3>本次复盘</h3><div id="review-summary"></div></section>
+        </div>
+      </section>
+    </section>
+    <p id="interview-status" class="form-status" role="status"></p>
+  </main>
+  <script src="./interview-store.js?v=1"></script><script src="./interviews.js?v=1"></script>
+</body>
+</html>

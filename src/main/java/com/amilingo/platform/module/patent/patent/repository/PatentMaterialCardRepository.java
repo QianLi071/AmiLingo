@@ -1,0 +1,2 @@
+package com.amilingo.platform.module.patent.repository;import com.amilingo.platform.module.patent.entity.PatentMaterialCard;import org.springframework.data.jpa.repository.JpaRepository;import java.util.*;
+public interface PatentMaterialCardRepository extends JpaRepository<PatentMaterialCard,Long>{List<PatentMaterialCard> findByPatentIdAndCurrentVersionTrueOrderByCardNoAsc(Long patentId);List<PatentMaterialCard> findByPatentIdAndCardNoOrderByVersionNoDesc(Long patentId,Integer cardNo);Optional<PatentMaterialCard> findFirstByPatentIdOrderByCardNoDesc(Long patentId);}

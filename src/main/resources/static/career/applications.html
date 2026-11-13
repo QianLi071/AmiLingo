@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 浏览器本地投递进度管理">
+  <title>AmiLingo · 我的投递</title>
+  <link rel="stylesheet" href="./styles.css?v=5">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="返回岗位发现页">
+      <span class="brand-mark">A</span>
+      <span>AmiLingo</span>
+    </a>
+    <nav class="topbar-nav" aria-label="就业模块导航">
+      <a href="./index.html">岗位列表</a>
+      <a href="./offers.html">Offer 对比</a>
+      <a href="./deadlines.html">截止日期</a>
+      <a href="./profile.html">求职资料助手</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="applications-hero">
+      <div>
+        <p class="section-kicker">Local application tracker</p>
+        <h1>我的投递</h1>
+        <p>把来自 AmiLingo 或其他渠道的岗位放在一起，手动记录从收藏到 Offer 的进度。</p>
+      </div>
+      <div class="application-total"><strong id="application-count">0</strong><span>条本地记录</span></div>
+    </section>
+
+    <section class="application-workspace">
+      <div class="application-toolbar">
+        <label class="search-field application-search">
+          <span class="sr-only">搜索投递记录</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
+          <input id="application-search" type="search" placeholder="搜索公司、岗位或备注">
+        </label>
+        <label><span class="filter-label">进度</span>
+          <select id="status-filter">
+            <option value="">全部进度</option>
+            <option value="SAVED">待投递</option>
+            <option value="APPLIED">已投递</option>
+            <option value="WRITTEN_TEST">笔试</option>
+            <option value="INTERVIEW">面试</option>
+            <option value="OFFER">Offer</option>
+            <option value="HIRED">已入职</option>
+            <option value="REJECTED">已拒绝</option>
+            <option value="WITHDRAWN">已放弃</option>
+          </select>
+        </label>
+        <button id="toggle-manual-form" class="primary-button" type="button">手动添加</button>
+      </div>
+
+      <form id="manual-application-form" class="manual-application-form" hidden>
+        <div class="card-heading">
+          <div><h2>添加其他渠道的岗位</h2><p>只记录岗位信息，不上传简历。</p></div>
+          <button id="close-manual-form" class="text-button" type="button">收起</button>
+        </div>
+        <div class="form-grid">
+          <label>公司名称<input id="manual-company" maxlength="128" required></label>
+          <label>岗位名称<input id="manual-position" maxlength="128" required></label>
+          <label>官网链接<input id="manual-url" type="url" maxlength="1000" placeholder="https://"></label>
+          <label>申请截止<input id="manual-deadline" type="date"></label>
+        </div>
+        <button class="primary-button" type="submit">加入我的投递</button>
+        <p id="manual-status" class="form-status" role="status"></p>
+      </form>
+
+      <div class="application-summary" id="application-summary"></div>
+      <p id="application-status" class="status" role="status" aria-live="polite"></p>
+      <div id="application-list" class="application-list"></div>
+      <div id="application-empty" class="application-empty" hidden>
+        <span class="detail-icon">＋</span>
+        <h2>还没有投递记录</h2>
+        <p>可以从岗位列表点击“加入我的投递”，也可以在这里手动添加。</p>
+        <a class="secondary-link" href="./index.html">返回岗位列表</a>
+      </div>
+
+      <p class="local-data-note">所有进度和备注仅保存在当前浏览器。清除浏览器站点数据后无法恢复，请勿记录证件、密码或其他敏感信息。</p>
+    </section>
+  </main>
+
+  <script src="./application-store.js?v=1"></script>
+  <script src="./applications.js?v=1"></script>
+</body>
+</html>

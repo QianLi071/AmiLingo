@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AmiLingo 浏览器本地数据备份与恢复">
+  <title>AmiLingo · 本地数据中心</title>
+  <link rel="stylesheet" href="./styles.css?v=5">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html"><span class="brand-mark">A</span><span>AmiLingo</span></a>
+    <nav class="topbar-nav" aria-label="就业模块导航"><a href="./index.html">岗位列表</a><a href="./applications.html">我的投递</a><a href="./profile.html">求职资料助手</a><a href="../club/">校园探索</a></nav>
+  </header>
+  <main>
+    <section class="profile-hero">
+      <div><p class="section-kicker">Local data portability</p><h1>本地数据中心</h1><p>把当前浏览器里的求职和校园探索记录下载成备份文件，或在另一台设备上选择性恢复。</p></div>
+      <div class="privacy-card"><strong>文件只在你的设备间流转</strong><span>导出和恢复均在浏览器内完成，不会上传到 AmiLingo 后端。</span></div>
+    </section>
+    <section class="data-center-grid">
+      <article class="data-panel">
+        <div class="card-heading"><div><h2>导出本地数据</h2><p>仅导出你勾选且当前已有内容的类别。</p></div></div>
+        <div id="export-list" class="data-choice-list"></div>
+        <div class="sensitive-warning"><strong>注意：</strong>备份可能包含姓名、联系方式、回答和个人经历。请勿上传到公共网盘或提交进代码仓库。</div>
+        <div class="profile-actions"><button id="export-button" class="primary-button" type="button">下载备份文件</button><button id="clear-selected" class="danger-button" type="button">清除所选数据</button></div>
+      </article>
+      <article class="data-panel">
+        <div class="card-heading"><div><h2>从备份恢复</h2><p>只接受由此页面生成、大小不超过 2 MB 的 JSON 文件。</p></div></div>
+        <label class="backup-file"><span>选择备份文件</span><input id="backup-file" type="file" accept="application/json,.json"></label>
+        <div id="import-list" class="data-choice-list"></div>
+        <div id="import-actions" class="profile-actions" hidden><button id="restore-button" class="primary-button" type="button">恢复所选数据</button></div>
+      </article>
+    </section>
+    <p id="data-status" class="form-status data-center-status" role="status" aria-live="polite"></p>
+  </main>
+  <script src="./local-data-backup.js?v=1"></script>
+  <script src="./data-center.js?v=1"></script>
+</body>
+</html>
