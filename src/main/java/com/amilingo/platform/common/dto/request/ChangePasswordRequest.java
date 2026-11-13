@@ -1,4 +1,5 @@
 package com.amilingo.platform.common.dto.request;
 
-public class ChangePasswordRequest {
+public record ChangePasswordRequest(String password, String passwordConfirm) {
+
 }
