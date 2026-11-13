@@ -46,6 +46,14 @@ public class UserCache extends AbstractCacheEngine<User, Long> {
         redisService.setValue(emailPrefix + user.getEmail(), String.valueOf(user.getId()));
     }
 
+    /**
+     * 删除旧"邮箱 → userId"二级缓存映射。
+     * 换绑邮箱后必须调用，否则旧邮箱仍可从缓存命中该用户，造成安全风险（旧邮箱可继续登录）。
+     */
+    public void deleteUserEmailKey(String email){
+        redisService.deleteValue(emailPrefix + email);
+    }
+
     @Override
     public String getId(User user) {
         return user.getId().toString();

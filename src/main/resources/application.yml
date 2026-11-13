@@ -44,6 +44,35 @@ jwt:
   secret: ${JWT_SECRET:}
   expiration: ${JWT_EXPIRATION:86400000}
 
+# 应用层安全配置（登录安全机制 / 统一验证码模块 / 短信供应商）
+app:
+  mail:
+    from: ${MAIL_FROM:}
+    from-name: ${MAIL_FROM_NAME:Amilingo}
+  sms:
+    # 短信供应商实现：
+    #   log  = 开发环境桩（验证码仅输出服务端日志，⚠️ 严禁生产使用）
+    #   生产环境接入真实供应商后，新增 SmsSender 实现并切换为对应值使桩自动退让
+    provider: ${SMS_PROVIDER:log}
+  security:
+    # 登录安全：陌生设备/位置的邮箱二次验证
+    login:
+      # 二次验证挑战（challenge）有效期（秒）
+      challenge-ttl-seconds: ${LOGIN_CHALLENGE_TTL:300}
+      # 单个挑战允许的验证码错误次数，超过即作废挑战（需重新密码登录）
+      max-verify-attempts: ${LOGIN_MAX_VERIFY_ATTEMPTS:5}
+      # 受信任设备指纹滚动有效期（天）与每用户最大记忆设备数
+      trust-ttl-days: ${LOGIN_TRUST_TTL_DAYS:30}
+      trust-max-devices: ${LOGIN_TRUST_MAX_DEVICES:5}
+    # 统一验证码模块（登录二次验证 / 手机号登录 / 邮箱·手机号绑定共用）
+    verify-code:
+      ttl-seconds: ${VERIFY_CODE_TTL:300}
+      length: ${VERIFY_CODE_LENGTH:6}
+      # 同一目标的验证码发送冷却秒数（防轰炸）
+      resend-cooldown-seconds: ${VERIFY_CODE_COOLDOWN:60}
+      # 单个验证码允许的错误次数，超过即作废（需重新发送）
+      max-verify-attempts: ${VERIFY_CODE_MAX_ATTEMPTS:5}
+
 # AI 能力配置
 # ai.provider 选择 AiGateway 实现：
 #   deepseek（默认，无需本地模型/ Python，直接走云端 DeepSeek，适合 models/llama.cpp 留空时）

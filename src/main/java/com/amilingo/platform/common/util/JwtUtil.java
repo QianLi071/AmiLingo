@@ -5,8 +5,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import java.net.ResponseCache;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +17,9 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-
     public static final String USER_ID_CLAIM = "userId";
     public static final String BEARER_PREFIX = "Bearer ";
+    private static final String COOKIE_ROOT = "/";
 
     @Value("${jwt.secret}")
     private String secret;
@@ -89,5 +92,14 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static ResponseCookie produceCookie(Duration duration, String token){
+        return ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .sameSite("Lax")
+                .path(COOKIE_ROOT)
+                .maxAge(duration)
+                .build();
     }
 }

@@ -7,5 +7,4 @@ public interface IPetService {
     @Transactional
     void savePet(Pet user);
     Pet getPetById(Long id);
-    Pet getPetByName(String name);
 }
