@@ -2,8 +2,8 @@ package com.amilingo.platform.common.aspect;
 
 import com.amilingo.platform.common.annotation.RateLimit;
 import com.amilingo.platform.common.exceptions.ApiException;
+import com.amilingo.platform.common.util.RequestFingerprintUtil;
 import com.amilingo.platform.component.redis.RedisService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -58,7 +58,7 @@ public class RateLimitAspect {
     }
 
     /**
-     * 解析客户端真实 IP，依次尝试 X-Forwarded-For、X-Real-IP，最后回退到 remoteAddr。
+     * 解析客户端真实 IP（统一复用 RequestFingerprintUtil，与登录指纹采集保持一致）。
      */
     private String resolveClientIp() {
         ServletRequestAttributes attrs =
@@ -66,18 +66,6 @@ public class RateLimitAspect {
         if (attrs == null) {
             return "unknown";
         }
-        HttpServletRequest request = attrs.getRequest();
-
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            // X-Forwarded-For 可能含多个 IP，取最左侧的原始客户端 IP
-            int comma = ip.indexOf(',');
-            return comma > 0 ? ip.substring(0, comma).trim() : ip.trim();
-        }
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.trim();
-        }
-        return request.getRemoteAddr();
+        return RequestFingerprintUtil.resolveClientIp(attrs.getRequest());
     }
 }

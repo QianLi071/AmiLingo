@@ -26,6 +26,22 @@ public class Paper {
     @Column(nullable = false)
     private String title;
 
+    /** 选题阶段信息 */
+    @Column(columnDefinition = "TEXT")
+    private String topicBackground;
+    private String researchDirection;
+    @Column(columnDefinition = "TEXT")
+    private String researchObjective;
+    @Column(columnDefinition = "TEXT")
+    private String researchQuestion;
+    private String keywords;
+    private String topicSource;
+    private String supervisor;
+    private LocalDate expectedCompletionDate;
+    /** DRAFT / CONFIRMED / ARCHIVED */
+    @Column(nullable = false)
+    private String topicStatus;
+
     /** 作者顺序（第几作者，1 = 第一作者） */
     private Integer authorOrder;
 
@@ -70,6 +86,8 @@ public class Paper {
 
     @PrePersist
     void onCreate() {
+        if (status == null || status.isBlank()) status = "WRITING";
+        if (topicStatus == null || topicStatus.isBlank()) topicStatus = "DRAFT";
         createdAt = updatedAt = LocalDateTime.now();
     }
 

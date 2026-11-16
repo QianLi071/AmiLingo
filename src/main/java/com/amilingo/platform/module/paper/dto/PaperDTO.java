@@ -19,6 +19,16 @@ public class PaperDTO {
     /** 论文标题 */
     private String title;
 
+    private String topicBackground;
+    private String researchDirection;
+    private String researchObjective;
+    private String researchQuestion;
+    private String keywords;
+    private String topicSource;
+    private String supervisor;
+    private LocalDate expectedCompletionDate;
+    private String topicStatus;
+
     /** 作者顺序（第几作者） */
     private Integer authorOrder;
 
