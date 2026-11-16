@@ -1,2 +1,0 @@
-package com.amilingo.platform.module.patent.repository;import com.amilingo.platform.module.patent.entity.PatentInventor;import org.springframework.data.jpa.repository.JpaRepository;import java.util.List;
-public interface PatentInventorRepository extends JpaRepository<PatentInventor,Long>{List<PatentInventor> findByPatentIdOrderByInventorOrderAsc(Long patentId);boolean existsByPatentIdAndInventorOrder(Long patentId,Integer order);}

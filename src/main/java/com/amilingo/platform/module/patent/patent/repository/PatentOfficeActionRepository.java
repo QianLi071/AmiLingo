@@ -1,2 +1,0 @@
-package com.amilingo.platform.module.patent.repository;import com.amilingo.platform.module.patent.entity.PatentOfficeAction;import org.springframework.data.jpa.repository.JpaRepository;import java.util.*;
-public interface PatentOfficeActionRepository extends JpaRepository<PatentOfficeAction,Long>{List<PatentOfficeAction> findByPatentIdOrderByRoundNoDesc(Long patentId);Optional<PatentOfficeAction> findFirstByPatentIdOrderByRoundNoDesc(Long patentId);}
