@@ -140,6 +140,6 @@ prompts/
 ## 版本：迭代 1 · 2026-09-12
 | 任务             | 负责人    | 状态  | 构建  | 测试  | 后端文档（必读）                                                                      | 前端API文档（必读）                                     |
 |----------------|--------|-----|-----|-----|---------------------------------------------------------------------------|-------------------------------------------------|
-| 应用基础，登录，数据库，缓存 | Lotiyu | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | [frontend-api-doc.md](docs/frontend-api-doc.md) |
+| 应用基础，登录，数据库，缓存 | Loirsa | 已完成 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | [frontend-api-doc.md](docs/frontend-api-doc.md) |
 | lang 语言学习模块骨架、`infra/ai` AI 网关（AiGateway / NoopAiGateway / PythonAiGateway）、AI 写作评分链路（WritingScorer）、Python 离线助手 OfflineAssistant（FastAPI + llama.cpp：文本/图片作文评分、Prompt 注册表、逐句批改、范文检索）、为 WYK300 的IELTS 前端 Demo 接入真实 AI（含离线 mock 降级） | QianLi071 | 🔄 进行中 | ✅通过 | ✅通过 | [iteration-development-roadmap.md](docs/iteration-development-roadmap.md) | [writing-frontend-api.md](docs/writing-frontend-api.md) |
 | IELTS 前端 Demo（页面 / 课表 / 排程 / 测评流程） | WYK300 | ✅ 已完成 | ✅通过 | ✅通过 | — | — |

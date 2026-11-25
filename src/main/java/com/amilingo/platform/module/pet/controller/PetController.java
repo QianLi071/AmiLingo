@@ -1,4 +1,4 @@
-package com.amilingo.platform.api.pet;
+package com.amilingo.platform.module.pet.controller;
 
 import com.amilingo.platform.common.config.security.SecurityUtil;
 import com.amilingo.platform.common.dto.ApiResponse;
@@ -22,13 +22,10 @@ public class PetController {
     }
 
     @GetMapping("/status")
-    public ApiResponse<?> checkPetStatus() {
+    public ApiResponse<PetStatusDTO> checkPetStatus() {
         Long id = SecurityUtil.getCurrentUserId();
         Pet pet = petService.getPetById(id);
-        return ApiResponse.ok(Map.of(
-                "code", 200,
-                "data", PetStatusDTO.fromPet(pet)
-        ));
+        return ApiResponse.ok("ok", PetStatusDTO.fromPet(pet));
     }
 
 //    @PostMapping
