@@ -1,2 +1,0 @@
-package com.amilingo.platform.module.patent.repository;import com.amilingo.platform.module.patent.entity.PatentDeadline;import org.springframework.data.jpa.repository.JpaRepository;import java.time.LocalDate;import java.util.List;
-public interface PatentDeadlineRepository extends JpaRepository<PatentDeadline,Long>{List<PatentDeadline> findByPatentIdOrderByDueDateAsc(Long patentId);List<PatentDeadline> findByStatusAndDueDateLessThanEqualOrderByDueDateAsc(String status,LocalDate date);}
